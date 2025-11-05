@@ -25,8 +25,16 @@
 require("dotenv").config(); // Step 1: Load environment variables from .env
 const express = require("express");
 const connectDB = require("./config/db");
+const cors = require("cors");
 
 const app = express();
+
+app.use(
+  cors({
+    origin: "http://localhost:3000", // or your deployed frontend URL
+    credentials: true, // if you send cookies or tokens
+  })
+);
 
 // Step 2: Connect to MongoDB
 connectDB();
