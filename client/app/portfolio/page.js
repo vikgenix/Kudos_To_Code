@@ -1,8 +1,10 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { Mail, MapPin, GraduationCap, ExternalLink } from "lucide-react";
+import { AppSidebar } from "@/components/app-sidebar";
+import { SiteHeader } from "@/components/site-header";
+import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 
-// Mock data structure - you can replace this with actual data
 
 const mockData = {
   profile: {
@@ -98,6 +100,16 @@ const Portfolio = () => {
     
 
   return (
+    <SidebarProvider
+      style={
+        {
+          "--sidebar-width": "calc(var(--spacing) * 72)",
+          "--header-height": "calc(var(--spacing) * 12)"
+        }
+      }>
+    <AppSidebar variant="inset" />
+    <SidebarInset>
+    <SiteHeader headerTitle="Portfolio"/>
     <div className="min-h-screen bg-gray-50 p-8">
       <div className="max-w-7xl mx-auto grid grid-cols-12 gap-6">
         {/* Left Sidebar - Profile */}
@@ -466,7 +478,9 @@ const Portfolio = () => {
           </div>
         </div>
       </div>
-    </div>
+      </div>
+      </SidebarInset>
+    </SidebarProvider>
   );
 };
 
