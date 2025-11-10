@@ -4,7 +4,7 @@ const generateToken = require("../services/jwtService")
 
 // Define a schema (blueprint of user data)
 const userSchema = new mongoose.Schema({
-  name: { type: String, required: true },
+  name: { type: String },
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
 });

@@ -31,7 +31,7 @@ const app = express();
 
 app.use(
   cors({
-    origin: "http://localhost:3000", // or your deployed frontend URL
+    origin: "http://localhost:3000" || "https://kudos-to-code.vercel.app/", // or your deployed frontend URL
     credentials: true, // if you send cookies or tokens
   })
 );
