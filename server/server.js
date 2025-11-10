@@ -30,10 +30,7 @@ const cors = require("cors");
 const app = express();
 
 app.use(
-  cors({
-    origin: "https://kudos-to-code.vercel.app", // or your deployed frontend URL
-    credentials: true, // if you send cookies or tokens
-  })
+  cors()
 );
 
 // Step 2: Connect to MongoDB
