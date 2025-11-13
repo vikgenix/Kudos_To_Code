@@ -1,16 +1,16 @@
-🚀 Kudos to Code — Coding Profile Builder
+# 🚀 Kudos to Code — Coding Profile Builder
 
 A unified platform that aggregates your coding journey — projects, stats, and competitive programming profiles — into one dynamic portfolio.
 Showcase your achievements, GitHub activity, and competitive programming stats from platforms like LeetCode, Codeforces, and more, all with a single, shareable link.
 
-🧩 Problem Statement
+## 🧩 Problem Statement
 
 Developers today have their work scattered across platforms — GitHub for projects, LeetCode for problems, Codeforces for contests, etc.
 Kudos to Code solves this by creating a centralized, unified profile builder that brings together all your coding stats, projects, and achievements into a sleek, personalized portfolio.
 
 “One profile. One link. Your entire coding identity.”
 
-🏗️ System Architecture
+## 🏗️ System Architecture
 
 Kudos to Code follows a modern decoupled architecture ensuring scalability, speed, and maintainability.
 
@@ -23,7 +23,7 @@ Backend: Node.js with Express — handles API requests, authentication, and CRUD
 
 Database: MongoDB Atlas — stores user profiles, projects, and stats data
 
-⚙️ Tech Stack
+## ⚙️ Tech Stack
 Layer	Technology	Description
 Frontend	Next.js
 	React framework with SSR for performance and SEO
@@ -40,7 +40,7 @@ Backend: Render
 
 Database: MongoDB Atlas
 	
-🔑 Key Features
+## 🔑 Key Features
 Feature	Description
 🔐 Auth & Authorization	Custom JWT-based login & registration system for secure API access
 🧾 CRUD Operations	Create, read, update, and delete personal profiles and showcased projects
@@ -76,7 +76,7 @@ Paginate Results:
 
 GET /api/cp-sheets?page=1&limit=20
 
-🧩 System Workflow
+## 🧩 System Workflow
 
 User Registration / Login — via /api/auth/register and /api/auth/login
 
@@ -86,7 +86,7 @@ Portfolio Generation — dynamic profile route like /username displays all codin
 
 CRUD Operations — users can manage their own portfolio and problem sheets
 
-🚀 Future Enhancements
+## 🚀 Future Enhancements
 
 Integration with AtCoder, HackerRank, and CodeChef
 
@@ -96,7 +96,7 @@ Leaderboard and community rankings
 
 Activity analytics dashboard showing coding trends
 
-📂 Project Folder Structure
+## 📂 Project Folder Structure
 ```
 Kudos_To_Code/
 │
@@ -181,7 +181,6 @@ Kudos_To_Code/
 └── README.md                           # Project documentation (root)
 ```
 
-🧑‍💻 Author
-Name	Role
-Vikrant Yadav
-	Full Stack Developer & Project Lead
+## 🧑‍💻 Author
+Name:- Vikrant Yadav
+Role:- Full Stack Developer & Project Lead
