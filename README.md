@@ -97,7 +97,7 @@ Leaderboard and community rankings
 Activity analytics dashboard showing coding trends
 
 📂 Project Folder Structure
-
+```
 Kudos_To_Code/
 │
 ├── client/                             # Frontend (Next.js)
@@ -179,7 +179,7 @@ Kudos_To_Code/
 │
 ├── .gitignore
 └── README.md                           # Project documentation (root)
-
+```
 
 🧑‍💻 Author
 Name	Role
