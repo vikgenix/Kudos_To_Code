@@ -97,7 +97,7 @@ export function LoginForm({ className, ...props }) {
 
           <div className="bg-muted relative hidden md:block">
             <img
-              src="https://miro.medium.com/v2/resize:fit:1400/1*KnV1cBSw-kWyh7Y6XEEzrA.jpeg"
+              src="/LoginKudos.jpg"
               alt="Image"
               className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
             />
@@ -105,5 +105,5 @@ export function LoginForm({ className, ...props }) {
         </CardContent>
       </Card>
     </div>
-  );
+  )
 }
