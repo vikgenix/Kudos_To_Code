@@ -96,6 +96,91 @@ Leaderboard and community rankings
 
 Activity analytics dashboard showing coding trends
 
+📂 Project Folder Structure
+
+Kudos_To_Code/
+│
+├── client/                             # Frontend (Next.js)
+│   ├── app/                            # Core application files
+│   │   ├── context/                    # React Context for global state
+│   │   │   └── AuthContext.js
+│   │   ├── dashboard/
+│   │   │   └── page.jsx
+│   │   ├── HeroSectionDemo/
+│   │   │   └── page.js
+│   │   ├── login/
+│   │   │   └── page.jsx
+│   │   ├── portfolio/
+│   │   │   └── page.js
+│   │   ├── signup/
+│   │   │   └── page.jsx
+│   │   ├── services/
+│   │   │   ├── api.js
+│   │   │   ├── authService.js
+│   │   │   └── utils.js
+│   │   ├── layout.js                   # Root layout file
+│   │   ├── not-found.js                # 404 Page
+│   │   ├── page.js                     # Main entry
+│   │   └── globals.css                 # Global CSS styles
+│   │
+│   ├── components/                     # Reusable UI Components
+│   │   ├── blocks/
+│   │   │   ├── footer-section.jsx
+│   │   │   ├── hero-section-dark.jsx
+│   │   ├── ui/
+│   │   │   ├── app-sidebar.jsx
+│   │   │   ├── chart-area-interactive.jsx
+│   │   │   ├── data-table.jsx
+│   │   │   ├── login-form.jsx
+│   │   │   ├── signup-form.jsx
+│   │   │   ├── section-cards.jsx
+│   │   │   ├── site-header.jsx
+│   │   │   ├── nav-main.jsx
+│   │   │   ├── nav-secondary.jsx
+│   │   │   ├── nav-projects.jsx
+│   │   │   ├── nav-user.jsx
+│   │   │   └── team-switcher.jsx
+│   │   ├── hooks/
+│   │   │   └── use-mobile.js
+│   │   └── lib/
+│   │       └── utils.js
+│   │
+│   ├── public/                         # Static assets (images/icons)
+│   │   ├── LoginKudos.jpg
+│   │   ├── SignupKudos.jpg
+│   │   ├── loginMascot.png
+│   │   └── logo.jpg
+│   │
+│   ├── .env                            # Frontend environment variables
+│   ├── next.config.mjs                 # Next.js configuration
+│   ├── jsconfig.json                   # Path aliases & JS config
+│   ├── package.json                    # Frontend dependencies
+│   ├── postcss.config.mjs              # PostCSS configuration
+│   └── README.md
+│
+├── server/                             # Backend (Node.js + Express)
+│   ├── config/
+│   │   └── db.js                       # MongoDB connection setup
+│   ├── controllers/
+│   │   └── authController.js           # Handles authentication routes
+│   ├── middlewares/
+│   │   └── authMiddleware.js           # JWT verification middleware
+│   ├── models/
+│   │   └── User.js                     # User model (Mongoose)
+│   ├── routes/
+│   │   └── auth.js                     # Auth route definitions
+│   ├── services/
+│   │   ├── hashService.js              # Password hashing utilities
+│   │   └── jwtService.js               # JWT token generation/validation
+│   ├── .env                            # Backend environment variables
+│   ├── server.js                       # Express app entry point
+│   ├── package.json                    # Backend dependencies
+│   └── README.md
+│
+├── .gitignore
+└── README.md                           # Project documentation (root)
+
+
 🧑‍💻 Author
 Name	Role
 Vikrant Yadav
