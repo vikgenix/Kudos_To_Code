@@ -43,6 +43,13 @@ exports.login = async (req, res) => {
       return res.status(400).json({ message: "Invalid email or password" });
 
     // Step 3: Generate JWT using jwtService
+    // const Token = generateToken({ id: user._id, email: user.email });
+    // console.log(Token);
+    // const accessToken = Token.accessToken;
+    // const refreshToken = Token.refreshToken;
+    // // Step 4: Send success response with token
+    // res.json({ message: "Login successful!", accessToken, refreshToken });
+
     const token = generateToken({ id: user._id, email: user.email });
 
     // Step 4: Send success response with token

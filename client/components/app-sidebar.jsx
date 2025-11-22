@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import { RiDashboardFill } from "react-icons/ri"
 import {
   IconCamera,
   IconChartBar,
@@ -43,13 +44,18 @@ const data = {
   },
   navMain: [
     {
+      title: "Dashboard",
+      url: "/dashboard",
+      icon: RiDashboardFill,
+    },
+    {
       title: "Portfolio",
       url: "/portfolio",
       icon: IconDashboard,
     },
     {
       title: "Sheets",
-      url: "#",
+      url: "/dashboard/sheets",
       icon: IconFile,
     },
   ],
