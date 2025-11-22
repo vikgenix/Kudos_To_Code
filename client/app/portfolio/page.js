@@ -1,10 +1,16 @@
 "use client";
+
 import React, { useState, useEffect } from "react";
 import { Mail, MapPin, GraduationCap, ExternalLink } from "lucide-react";
+
 import { AppSidebar } from "@/components/app-sidebar";
 import { SiteHeader } from "@/components/site-header";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 
+import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
 
 const mockData = {
   profile: {
@@ -88,7 +94,6 @@ const Portfolio = () => {
   const [data] = useState(mockData);
   const [activityMap, setActivityMap] = useState([]);
 
-  // Generate activity map on client only
   useEffect(() => {
     setActivityMap(generateActivityMap());
   }, []);
@@ -97,390 +102,432 @@ const Portfolio = () => {
     const colors = ["#EBEDF0", "#C6E48B", "#7BC96F", "#239A3B", "#196127"];
     return colors[intensity] || colors[0];
   };
-    
 
   return (
     <SidebarProvider
-      style={
-        {
-          "--sidebar-width": "calc(var(--spacing) * 72)",
-          "--header-height": "calc(var(--spacing) * 12)"
-        }
-      }>
-    <AppSidebar variant="inset" />
-    <SidebarInset>
-    <SiteHeader headerTitle="Portfolio"/>
-    <div className="min-h-screen bg-gray-50 p-8">
-      <div className="max-w-7xl mx-auto grid grid-cols-12 gap-6">
-        {/* Left Sidebar - Profile */}
-        <div className="col-span-3 space-y-6">
-          <div className="bg-white rounded-lg shadow p-6">
-            <div className="flex flex-col items-center">
-              <img
-                src={data.profile.avatar}
-                alt={data.profile.name}
-                className="w-32 h-32 rounded-full mb-4"
-              />
-              <h2 className="text-2xl text-gray-800 font-bold text-center">
-                {data.profile.name}
-              </h2>
-              <p className="text-blue-600 text-sm mb-4">
-                {data.profile.username} ✓
-              </p>
-              <p className="text-gray-600 text-sm text-center">
-                {data.profile.title}
-              </p>
-            </div>
-
-            <div className="flex justify-center gap-4 mt-6 mb-6">
-              <Mail className="w-5 h-5 text-gray-600 cursor-pointer" />
-              <ExternalLink className="w-5 h-5 text-gray-600 cursor-pointer" />
-            </div>
-
-            <div className="space-y-3 border-t pt-4">
-              <div className="flex items-center gap-2 text-gray-700">
-                <MapPin className="w-4 h-4" />
-                <span className="text-sm">{data.profile.location}</span>
-              </div>
-              <div className="flex items-center gap-2 text-gray-700">
-                <GraduationCap className="w-4 h-4" />
-                <span className="text-sm">{data.profile.institution}</span>
-              </div>
-            </div>
-
-            <div className="mt-6 pt-4 border-t space-y-2">
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-600">Last Refresh:</span>
-                <span className="font-medium text-gray-800">
-                  {data.profile.lastRefresh}
-                </span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-600">Profile Views:</span>
-                <span className="font-medium text-gray-800">
-                  {data.profile.profileViews}
-                </span>
-              </div>
-            </div>
-
-            <div className="mt-6 pt-4 border-t">
-              <button className="w-full flex items-center justify-between p-3 hover:bg-gray-50 rounded">
-                <span className="font-medium text-gray-800">
-                  Problem Solving Stats
-                </span>
-                <span className="text-gray-400">▲</span>
-              </button>
-
-              <div className="mt-4 space-y-2">
-                {data.platforms.map((platform, idx) => (
-                  <div
-                    key={idx}
-                    className="flex items-center justify-between p-2 hover:bg-gray-50 rounded"
-                  >
-                    <div className="flex items-center gap-2">
-                      <span className="text-2xl">💻</span>
-                      <span className="text-sm text-gray-800">
-                        {platform.name}
-                      </span>
-                    </div>
-                    {platform.connected && (
-                      <span className="text-green-500">✓</span>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Main Content */}
-        <div className="col-span-9 space-y-6">
-          {/* Top Stats Cards */}
-          <div className="grid grid-cols-2 gap-6">
-            <div className="bg-white rounded-lg shadow p-6">
-              <h3 className="text-gray-600 text-sm mb-2">Total Questions</h3>
-              <p className="text-5xl text-gray-800 font-bold">
-                {data.stats.totalQuestions}
-              </p>
-            </div>
-            <div className="bg-white rounded-lg shadow p-6">
-              <h3 className="text-gray-600 text-sm mb-2">Total Active Days</h3>
-              <p className="text-5xl text-gray-800 font-bold">
-                {data.stats.totalActiveDays}
-              </p>
-            </div>
-          </div>
-
-          {/* Activity Heatmap */}
-          <div className="bg-white rounded-lg shadow p-6">
-            <div className="flex justify-between items-center mb-4">
-              <span className="text-gray-600 text-sm">
-                <strong>{data.stats.submissions6Months}</strong> submissions in
-                past 6 months
-              </span>
-              <div className="flex gap-4 text-sm">
-                <span className="text-gray-600">
-                  Max Streak <strong>{data.stats.maxStreak}</strong>
-                </span>
-                <span className="text-gray-600">
-                  Current Streak <strong>{data.stats.currentStreak}</strong>
-                </span>
-              </div>
-            </div>
-
-            <div className="overflow-x-auto">
-              <div className="flex gap-2">
-                {activityMap.map((monthData, idx) => (
-                  <div key={idx} className="flex flex-col items-center">
-                    <div className="flex gap-1 mb-2">
-                      {monthData.weeks.map((week, weekIdx) => (
-                        <div key={weekIdx} className="flex flex-col gap-1">
-                          {week.map((intensity, dayIdx) => (
-                            <div
-                              key={dayIdx}
-                              className="w-3 h-3 rounded-sm"
-                              style={{
-                                backgroundColor: getActivityColor(intensity),
-                              }}
-                            />
-                          ))}
-                        </div>
-                      ))}
-                    </div>
-                    <span className="text-xs text-gray-600">
-                      {monthData.month}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* Contests and Rating */}
-          <div className="grid grid-cols-2 gap-6">
-            <div className="bg-white rounded-lg shadow p-6">
-              <h3 className="text-gray-600 text-sm mb-4">Total Contests</h3>
-              <p className="text-5xl text-gray-800 font-bold mb-6">
-                {data.stats.totalContests}
-              </p>
-
-              <div className="space-y-3">
-                {data.contests.map((contest, idx) => (
-                  <div
-                    key={idx}
-                    className="flex items-center justify-between p-3 bg-gray-50 rounded"
-                  >
-                    <div className="flex items-center gap-2">
-                      <span className="text-xl">{contest.logo}</span>
-                      <span className="text-sm text-gray-800 font-medium">
-                        {contest.name}
-                      </span>
-                    </div>
-                    <span className="font-bold">{contest.count}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="bg-white rounded-lg shadow p-6">
-              <h3 className="text-gray-600 text-sm mb-2">Rating</h3>
-              <p className="text-5xl text-gray-800 font-bold mb-2">
-                {data.rating.current}
-              </p>
-              <p className="text-sm text-gray-600 mb-1">{data.rating.date}</p>
-              <p className="text-sm text-gray-800 font-medium">
-                {data.rating.achievement}
-              </p>
-              <p className="text-xs text-gray-600">{data.rating.rank}</p>
-
-              <div className="mt-6 h-32 relative">
-                <svg className="w-full h-full" viewBox="0 0 400 120">
-                  <defs>
-                    <linearGradient
-                      id="gradient"
-                      x1="0%"
-                      y1="0%"
-                      x2="0%"
-                      y2="100%"
-                    >
-                      <stop offset="0%" stopColor="#FFA94D" stopOpacity="0.3" />
-                      <stop
-                        offset="100%"
-                        stopColor="#FFA94D"
-                        stopOpacity="0.1"
+      style={{
+        "--sidebar-width": "calc(var(--spacing) * 72)",
+        "--header-height": "calc(var(--spacing) * 12)",
+      }}
+    >
+      <AppSidebar variant="inset" />
+      <SidebarInset>
+        <SiteHeader headerTitle="Portfolio" />
+        <div className="min-h-screen bg-background">
+          <main className="mx-auto flex max-w-7xl flex-col gap-6 px-4 py-6 md:px-6 lg:py-8">
+            {/* Layout grid */}
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
+              {/* Left: Profile column */}
+              <div className="space-y-6 lg:col-span-4">
+                <Card className="overflow-hidden">
+                  <CardContent className="pt-6">
+                    {/* Avatar + name */}
+                    <div className="flex flex-col items-center text-center">
+                      <img
+                        src={data.profile.avatar}
+                        alt={data.profile.name}
+                        className="mb-4 h-28 w-28 rounded-full border border-border object-cover"
                       />
-                    </linearGradient>
-                  </defs>
-                  <path
-                    d="M 0 80 Q 50 60 100 50 T 200 45 T 300 55 T 400 60"
-                    fill="url(#gradient)"
-                    stroke="#FFA94D"
-                    strokeWidth="2"
-                  />
-                </svg>
-              </div>
-            </div>
-          </div>
-
-          {/* Problems Solved */}
-          <div className="bg-white rounded-lg shadow p-6">
-            <h3 className="text-xl text-gray-800 font-bold mb-6">
-              Problems Solved
-            </h3>
-
-            <div className="grid grid-cols-2 gap-8">
-              {/* Fundamentals */}
-              <div>
-                <h4 className="text-gray-700 font-medium mb-4">
-                  Fundamentals ⓘ
-                </h4>
-                <div className="flex items-center gap-6">
-                  <div className="relative w-40 h-40">
-                    <svg className="w-full h-full transform -rotate-90">
-                      <circle
-                        cx="80"
-                        cy="80"
-                        r="60"
-                        fill="none"
-                        stroke="#E5E7EB"
-                        strokeWidth="12"
-                      />
-                      {data.problems.fundamentals.breakdown.map(
-                        (item, idx, arr) => {
-                          const total = data.problems.fundamentals.total;
-                          const prevSum = arr
-                            .slice(0, idx)
-                            .reduce((sum, i) => sum + i.count, 0);
-                          const offset = (prevSum / total) * 377;
-                          const length = (item.count / total) * 377;
-
-                          return (
-                            <circle
-                              key={idx}
-                              cx="80"
-                              cy="80"
-                              r="60"
-                              fill="none"
-                              stroke={item.color}
-                              strokeWidth="12"
-                              strokeDasharray={`${length} 377`}
-                              strokeDashoffset={-offset}
-                            />
-                          );
-                        }
-                      )}
-                    </svg>
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <span className="text-3xl text-gray-800 font-bold">
-                        {data.problems.fundamentals.total}
-                      </span>
+                      <h2 className="text-xl font-semibold tracking-tight">
+                        {data.profile.name}
+                      </h2>
+                      <p className="mt-1 text-xs font-medium text-primary">
+                        {data.profile.username} ✓
+                      </p>
+                      <p className="mt-3 text-xs text-muted-foreground leading-relaxed">
+                        {data.profile.title}
+                      </p>
                     </div>
-                  </div>
 
-                  <div className="space-y-2">
-                    {data.problems.fundamentals.breakdown.map((item, idx) => (
-                      <div
-                        key={idx}
-                        className="flex items-center justify-between gap-8"
-                      >
-                        <div className="flex items-center gap-2">
-                          <div
-                            className="w-3 h-3 rounded-full"
-                            style={{ backgroundColor: item.color }}
-                          />
-                          <span
-                            className="text-sm"
-                            style={{ color: item.color }}
-                          >
-                            {item.name}
-                          </span>
-                        </div>
-                        <span className="font-medium text-gray-800">
-                          {item.count}
+                    {/* Icons */}
+                    <div className="mt-5 flex justify-center gap-4">
+                      <Button variant="outline" size="icon">
+                        <Mail className="h-4 w-4" />
+                      </Button>
+                      <Button variant="outline" size="icon">
+                        <ExternalLink className="h-4 w-4" />
+                      </Button>
+                    </div>
+
+                    <Separator className="my-5" />
+
+                    {/* Info */}
+                    <div className="space-y-3 text-sm">
+                      <div className="flex items-center gap-2 text-muted-foreground">
+                        <MapPin className="h-4 w-4" />
+                        <span>{data.profile.location}</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-muted-foreground">
+                        <GraduationCap className="h-4 w-4" />
+                        <span>{data.profile.institution}</span>
+                      </div>
+                    </div>
+
+                    <Separator className="my-5" />
+
+                    {/* Meta */}
+                    <div className="space-y-2 text-xs">
+                      <div className="flex items-center justify-between">
+                        <span className="text-muted-foreground">
+                          Last refresh
+                        </span>
+                        <span className="font-medium">
+                          {data.profile.lastRefresh}
                         </span>
                       </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-muted-foreground">
+                          Profile views
+                        </span>
+                        <span className="font-medium">
+                          {data.profile.profileViews}
+                        </span>
+                      </div>
+                    </div>
 
-              {/* DSA */}
-              <div>
-                <h4 className="text-gray-700 font-medium mb-4">DSA</h4>
-                <div className="flex items-center gap-6">
-                  <div className="relative w-40 h-40">
-                    <svg className="w-full h-full transform -rotate-90">
-                      <circle
-                        cx="80"
-                        cy="80"
-                        r="60"
-                        fill="none"
-                        stroke="#E5E7EB"
-                        strokeWidth="12"
-                      />
-                      {data.problems.dsa.breakdown.map((item, idx, arr) => {
-                        const total = data.problems.dsa.total;
-                        const prevSum = arr
-                          .slice(0, idx)
-                          .reduce((sum, i) => sum + i.count, 0);
-                        const offset = (prevSum / total) * 377;
-                        const length = (item.count / total) * 377;
+                    <Separator className="my-5" />
 
-                        return (
-                          <circle
+                    {/* Platforms */}
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="font-medium">
+                          Problem Solving Stats
+                        </span>
+                        <span className="text-xs text-muted-foreground">
+                          Platforms
+                        </span>
+                      </div>
+                      <div className="space-y-2">
+                        {data.platforms.map((platform, idx) => (
+                          <div
                             key={idx}
-                            cx="80"
-                            cy="80"
-                            r="60"
-                            fill="none"
-                            stroke={item.color}
-                            strokeWidth="12"
-                            strokeDasharray={`${length} 377`}
-                            strokeDashoffset={-offset}
-                          />
-                        );
-                      })}
-                    </svg>
-                    <div className="absolute inset-0 flex items-center justify-center text-gray-800">
-                      <span className="text-3xl font-bold">
-                        {data.problems.dsa.total}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    {data.problems.dsa.breakdown.map((item, idx) => (
-                      <div
-                        key={idx}
-                        className="flex items-center justify-between gap-8"
-                      >
-                        <div className="flex items-center gap-2">
-                          <div
-                            className="w-3 h-3 rounded-full"
-                            style={{ backgroundColor: item.color }}
-                          />
-                          <span
-                            className="text-sm "
-                            style={{ color: item.color }}
+                            className="flex items-center justify-between rounded-md border bg-muted/40 px-3 py-2"
                           >
-                            {item.name}
+                            <div className="flex items-center gap-2">
+                              <span className="text-lg">💻</span>
+                              <span className="text-xs font-medium">
+                                {platform.name}
+                              </span>
+                            </div>
+                            {platform.connected && (
+                              <Badge
+                                variant="outline"
+                                className="border-green-500/40 text-[10px] text-green-600"
+                              >
+                                Connected
+                              </Badge>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Right: main content */}
+              <div className="space-y-6 lg:col-span-8">
+                {/* Top stats */}
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <Card>
+                    <CardContent className="py-4">
+                      <p className="text-xs font-medium text-muted-foreground">
+                        Total Questions
+                      </p>
+                      <p className="mt-2 text-3xl font-bold md:text-4xl">
+                        {data.stats.totalQuestions}
+                      </p>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardContent className="py-4">
+                      <p className="text-xs font-medium text-muted-foreground">
+                        Total Active Days
+                      </p>
+                      <p className="mt-2 text-3xl font-bold md:text-4xl">
+                        {data.stats.totalActiveDays}
+                      </p>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                {/* Activity heatmap */}
+                <Card>
+                  <CardHeader className="pb-3">
+                    <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                      <p className="text-xs text-muted-foreground">
+                        <span className="font-semibold">
+                          {data.stats.submissions6Months}
+                        </span>{" "}
+                        submissions in the last 6 months
+                      </p>
+                      <div className="flex flex-wrap gap-4 text-xs text-muted-foreground">
+                        <span>
+                          Max streak{" "}
+                          <span className="font-semibold">
+                            {data.stats.maxStreak}
                           </span>
-                        </div>
-                        <span className="font-medium text-gray-800">
-                          {item.count}
+                        </span>
+                        <span>
+                          Current streak{" "}
+                          <span className="font-semibold">
+                            {data.stats.currentStreak}
+                          </span>
                         </span>
                       </div>
-                    ))}
-                  </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="overflow-x-auto">
+                      <div className="flex gap-3 pb-1">
+                        {activityMap.map((monthData, idx) => (
+                          <div
+                            key={idx}
+                            className="flex flex-col items-center gap-2"
+                          >
+                            <div className="flex gap-1">
+                              {monthData.weeks.map((week, weekIdx) => (
+                                <div
+                                  key={weekIdx}
+                                  className="flex flex-col gap-1"
+                                >
+                                  {week.map((intensity, dayIdx) => (
+                                    <div
+                                      key={dayIdx}
+                                      className="h-3 w-3 rounded-sm"
+                                      style={{
+                                        backgroundColor:
+                                          getActivityColor(intensity),
+                                      }}
+                                    />
+                                  ))}
+                                </div>
+                              ))}
+                            </div>
+                            <span className="text-[10px] text-muted-foreground">
+                              {monthData.month}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Contests + rating */}
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                  {/* Contests */}
+                  <Card>
+                    <CardHeader className="pb-3">
+                      <CardTitle className="text-sm font-semibold">
+                        Total Contests
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="mb-4 text-3xl font-bold md:text-4xl">
+                        {data.stats.totalContests}
+                      </p>
+                      <div className="space-y-2">
+                        {data.contests.map((contest, idx) => (
+                          <div
+                            key={idx}
+                            className="flex items-center justify-between rounded-md bg-muted/40 px-3 py-2 text-sm"
+                          >
+                            <div className="flex items-center gap-2">
+                              <span className="text-lg">{contest.logo}</span>
+                              <span className="font-medium">
+                                {contest.name}
+                              </span>
+                            </div>
+                            <span className="text-base font-semibold">
+                              {contest.count}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Rating */}
+                  <Card>
+                    <CardHeader className="pb-3">
+                      <CardTitle className="text-sm font-semibold">
+                        Rating
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-3xl font-bold md:text-4xl">
+                        {data.rating.current}
+                      </p>
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        {data.rating.date}
+                      </p>
+                      <p className="mt-1 text-xs font-medium">
+                        {data.rating.achievement}
+                      </p>
+                      <p className="text-[11px] text-muted-foreground">
+                        {data.rating.rank}
+                      </p>
+
+                      <div className="mt-4 h-24 w-full">
+                        <svg
+                          className="h-full w-full"
+                          viewBox="0 0 400 120"
+                          preserveAspectRatio="none"
+                        >
+                          <defs>
+                            <linearGradient
+                              id="ratingGradient"
+                              x1="0%"
+                              y1="0%"
+                              x2="0%"
+                              y2="100%"
+                            >
+                              <stop
+                                offset="0%"
+                                stopColor="hsl(var(--primary))"
+                                stopOpacity="0.35"
+                              />
+                              <stop
+                                offset="100%"
+                                stopColor="hsl(var(--primary))"
+                                stopOpacity="0.05"
+                              />
+                            </linearGradient>
+                          </defs>
+                          <path
+                            d="M 0 80 Q 50 60 100 50 T 200 45 T 300 55 T 400 60 L 400 120 L 0 120 Z"
+                            fill="url(#ratingGradient)"
+                            stroke="hsl(var(--primary))"
+                            strokeWidth="2"
+                          />
+                        </svg>
+                      </div>
+                    </CardContent>
+                  </Card>
                 </div>
+
+                {/* Problems solved */}
+                <Card>
+                  <CardHeader className="pb-4">
+                    <CardTitle className="text-sm font-semibold">
+                      Problems Solved
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                      {/* Fundamentals */}
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm font-medium">
+                            Fundamentals
+                          </span>
+                          <span className="text-[11px] text-muted-foreground">
+                            Platforms
+                          </span>
+                        </div>
+                        <div className="flex flex-col items-center gap-4 sm:flex-row">
+                          <DonutChart
+                            total={data.problems.fundamentals.total}
+                            breakdown={data.problems.fundamentals.breakdown}
+                          />
+                          <Legend
+                            breakdown={data.problems.fundamentals.breakdown}
+                          />
+                        </div>
+                      </div>
+
+                      {/* DSA */}
+                      <div className="space-y-3">
+                        <span className="text-sm font-medium">DSA</span>
+                        <div className="flex flex-col items-center gap-4 sm:flex-row">
+                          <DonutChart
+                            total={data.problems.dsa.total}
+                            breakdown={data.problems.dsa.breakdown}
+                          />
+                          <Legend breakdown={data.problems.dsa.breakdown} />
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
               </div>
             </div>
-          </div>
+          </main>
         </div>
-      </div>
-      </div>
       </SidebarInset>
     </SidebarProvider>
+  );
+};
+
+/**
+ * Small helper components for the donut chart & legend
+ */
+
+const DonutChart = ({ total, breakdown }) => {
+  const radius = 60;
+  const circumference = 2 * Math.PI * radius;
+
+  return (
+    <div className="relative h-32 w-32 sm:h-40 sm:w-40">
+      <svg className="h-full w-full -rotate-90">
+        <circle
+          cx="50%"
+          cy="50%"
+          r={radius}
+          fill="none"
+          stroke="#E5E7EB"
+          strokeWidth="12"
+        />
+        {breakdown.map((item, idx, arr) => {
+          const prevSum = arr.slice(0, idx).reduce((s, i) => s + i.count, 0);
+          const offset = (prevSum / total) * circumference;
+          const length = (item.count / total) * circumference;
+
+          return (
+            <circle
+              key={idx}
+              cx="50%"
+              cy="50%"
+              r={radius}
+              fill="none"
+              stroke={item.color}
+              strokeWidth="12"
+              strokeDasharray={`${length} ${circumference}`}
+              strokeDashoffset={-offset}
+              strokeLinecap="round"
+            />
+          );
+        })}
+      </svg>
+      <div className="absolute inset-0 flex items-center justify-center">
+        <span className="text-xl font-bold sm:text-2xl">{total}</span>
+      </div>
+    </div>
+  );
+};
+
+const Legend = ({ breakdown }) => {
+  return (
+    <div className="space-y-2 text-xs">
+      {breakdown.map((item, idx) => (
+        <div
+          key={idx}
+          className="flex items-center justify-between gap-6 whitespace-nowrap"
+        >
+          <div className="flex items-center gap-2">
+            <span
+              className="h-2 w-2 rounded-full"
+              style={{ backgroundColor: item.color }}
+            />
+            <span className="font-medium" style={{ color: item.color }}>
+              {item.name}
+            </span>
+          </div>
+          <span className="font-semibold">{item.count}</span>
+        </div>
+      ))}
+    </div>
   );
 };
 
