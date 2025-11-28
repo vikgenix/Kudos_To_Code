@@ -35,8 +35,10 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
+import { useAuth } from "@/app/context/AuthContext" // [!code ++]
 
 const data = {
+  // ... existing data structure ...
   user: {
     name: "Vikgenix",
     email: "m@example.com",
@@ -146,6 +148,15 @@ const data = {
 export function AppSidebar({
   ...props
 }) {
+  const { user } = useAuth(); // [!code ++]
+
+  // Construct the user object dynamically, falling back to hardcoded data if loading/null
+  const sidebarUser = user ? { // [!code ++]
+    name: user.name, // [!code ++]
+    email: user.email, // [!code ++]
+    avatar: user.avatar || "/avatars/shadcn.jpg", // [!code ++]
+  } : data.user; // [!code ++]
+
   return (
     <Sidebar collapsible="offcanvas" {...props}>
       <SidebarHeader>
@@ -175,7 +186,7 @@ export function AppSidebar({
         <NavSecondary items={data.navSecondary} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={data.user} />
+        <NavUser user={sidebarUser} /> {/* [!code ++] */}
       </SidebarFooter>
     </Sidebar>
   );

@@ -1,8 +1,8 @@
+// client/app/layout.js
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "./context/AuthContext";
-import React,{useContext} from "react";
-
+import AuthGuard from "../components/AuthGuard"; // Import the new component
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -22,13 +22,14 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <AuthProvider>
-        <body
-          className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-        >
-          {children}
-        </body>
-      </AuthProvider>
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+      >
+        <AuthProvider>
+          {/* AuthGuard is inside AuthProvider to access user state */}
+          <AuthGuard>{children}</AuthGuard>
+        </AuthProvider>
+      </body>
     </html>
   );
 }
