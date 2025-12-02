@@ -1,8 +1,8 @@
 import axios from "axios";
 
-// const backendUrl = process.env.NEXT_PUBLIC_BACKEND_API_URL || "http://localhost:5000";
-// const baseURL = backendUrl.endsWith("/api") ? backendUrl : `${backendUrl}/api`;
-const baseURL = "http://localhost:5000/api";
+const backendUrl = process.env.NEXT_PUBLIC_BACKEND_API_URL || "http://localhost:5000";
+const baseURL = backendUrl.endsWith("/api") ? backendUrl : `${backendUrl}/api`;
+// const baseURL = "http://localhost:5000/api";
 
 console.log("API Base URL:", baseURL);
 
