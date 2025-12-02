@@ -265,15 +265,6 @@ const CodingSheetsApp = () => {
     section: "General",
   });
 
-  // Pagination State
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 9;
-
-  // Reset pagination when search or filter changes
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [searchQuery, filterType]);
-
   // ... (useEffect and load functions remain same)
   useEffect(() => {
     loadSheets();
@@ -404,18 +395,6 @@ const CodingSheetsApp = () => {
     return true;
   });
 
-  // Pagination Logic
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentSheets = filteredSheets.slice(indexOfFirstItem, indexOfLastItem);
-  const totalPages = Math.ceil(filteredSheets.length / itemsPerPage);
-
-  const handlePageChange = (pageNumber) => {
-    setCurrentPage(pageNumber);
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  };
-
-  // Process problems for the selected sheet (Detail View)
   // Processed Sections Logic (Filter & Sort Problems)
   const processedSections = selectedSheetDetail?.sections.map(section => {
     let problems = [...section.problems];
@@ -476,8 +455,6 @@ const CodingSheetsApp = () => {
             </p>
           </div>
         </header>
-
-
 
         {selectedSheetDetail ? (
           // --- DETAIL VIEW ---
@@ -956,101 +933,62 @@ const CodingSheetsApp = () => {
               </Dialog>
             </div>
 
-            {currentSheets.length > 0 ? (
-              <>
-                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                  {currentSheets.map((sheet) => {
-                    return (
-                      <Card
-                        key={sheet._id}
-                        className="cursor-pointer transition-all duration-200 hover:shadow-md hover:border-slate-300 group flex flex-col"
-                        onClick={() => setSelectedSheetId(sheet._id)}
-                      >
-                        <CardHeader className="pb-3 flex-1">
-                          <div className="flex items-start justify-between gap-2">
-                            <div>
-                              <CardTitle className="text-base group-hover:text-blue-600 transition-colors">
-                                {sheet.title}
-                              </CardTitle>
-                              <p className="mt-1 text-xs text-slate-500">
-                                {sheet.followers.toLocaleString()} followers
-                              </p>
-                            </div>
-                            {sheet.progress > 0 && (
-                              <Badge
-                                variant="secondary"
-                                className={`text-xs ${
-                                  sheet.progress === 100
-                                    ? "bg-green-100 text-green-800"
-                                    : ""
-                                }`}
-                              >
-                                {sheet.progress}%
-                              </Badge>
-                            )}
+            {filteredSheets.length > 0 ? (
+              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                {filteredSheets.map((sheet) => {
+                  return (
+                    <Card
+                      key={sheet._id}
+                      className="cursor-pointer transition-all duration-200 hover:shadow-md hover:border-slate-300 group flex flex-col"
+                      onClick={() => setSelectedSheetId(sheet._id)}
+                    >
+                      <CardHeader className="pb-3 flex-1">
+                        <div className="flex items-start justify-between gap-2">
+                          <div>
+                            <CardTitle className="text-base group-hover:text-blue-600 transition-colors">
+                              {sheet.title}
+                            </CardTitle>
+                            <p className="mt-1 text-xs text-slate-500">
+                              {sheet.followers.toLocaleString()} followers
+                            </p>
                           </div>
-                          <CardDescription className="line-clamp-2 text-xs leading-relaxed mt-2">
-                            {sheet.description}
-                          </CardDescription>
-                        </CardHeader>
-                        <CardFooter className="flex items-center justify-between pt-2 border-t border-slate-50 bg-slate-50/50 rounded-b-xl py-3">
-                          <div className="flex items-center gap-1.5 text-xs text-slate-500 font-medium">
-                            <BookOpen className="h-3.5 w-3.5" />
-                            <span>{sheet.questions} questions</span>
-                          </div>
-                          <div className="text-xs font-medium text-slate-900 flex items-center gap-1 group-hover:translate-x-1 transition-transform">
-                            View <ChevronLeft className="h-3 w-3 rotate-180" />
-                          </div>
-                        </CardFooter>
-                        {/* Progress Bar Line at Bottom */}
-                        <div className="h-1 w-full bg-slate-100">
-                          <div
-                            className="h-full bg-green-500 transition-all duration-500"
-                            style={{ width: `${sheet.progress}%` }}
-                          />
+                          {sheet.progress > 0 && (
+                            <Badge
+                              variant="secondary"
+                              className={`text-xs ${
+                                sheet.progress === 100
+                                  ? "bg-green-100 text-green-800"
+                                  : ""
+                              }`}
+                            >
+                              {sheet.progress}%
+                            </Badge>
+                          )}
                         </div>
-                      </Card>
-                    );
-                  })}
-                </div>
-
-                {/* Pagination Controls */}
-                {totalPages > 1 && (
-                  <div className="flex items-center justify-center gap-2 mt-8">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handlePageChange(currentPage - 1)}
-                      disabled={currentPage === 1}
-                    >
-                      Previous
-                    </Button>
-                    <div className="flex items-center gap-1">
-                      {Array.from({ length: totalPages }, (_, i) => i + 1).map(
-                        (page) => (
-                          <Button
-                            key={page}
-                            variant={currentPage === page ? "default" : "ghost"}
-                            size="sm"
-                            className="w-8 h-8 p-0"
-                            onClick={() => handlePageChange(page)}
-                          >
-                            {page}
-                          </Button>
-                        )
-                      )}
-                    </div>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handlePageChange(currentPage + 1)}
-                      disabled={currentPage === totalPages}
-                    >
-                      Next
-                    </Button>
-                  </div>
-                )}
-              </>
+                        <CardDescription className="line-clamp-2 text-xs leading-relaxed mt-2">
+                          {sheet.description}
+                        </CardDescription>
+                      </CardHeader>
+                      <CardFooter className="flex items-center justify-between pt-2 border-t border-slate-50 bg-slate-50/50 rounded-b-xl py-3">
+                        <div className="flex items-center gap-1.5 text-xs text-slate-500 font-medium">
+                          <BookOpen className="h-3.5 w-3.5" />
+                          <span>{sheet.questions} questions</span>
+                        </div>
+                        <div className="text-xs font-medium text-slate-900 flex items-center gap-1 group-hover:translate-x-1 transition-transform">
+                          View <ChevronLeft className="h-3 w-3 rotate-180" />
+                        </div>
+                      </CardFooter>
+                      {/* Progress Bar Line at Bottom */}
+                      <div className="h-1 w-full bg-slate-100">
+                        <div
+                          className="h-full bg-green-500 transition-all duration-500"
+                          style={{ width: `${sheet.progress}%` }}
+                        />
+                      </div>
+                    </Card>
+                  );
+                })}
+              </div>
             ) : (
               <div className="text-center py-12 border-2 border-dashed border-slate-200 rounded-xl bg-slate-50">
                 <h3 className="text-lg font-medium text-slate-900">
