@@ -1,7 +1,8 @@
 import axios from "axios";
 
 // Use relative URL to leverage Next.js proxy
-const baseURL = "/api";
+// Use environment variable for API URL, fallback to relative path (proxy)
+const baseURL = process.env.NEXT_PUBLIC_API_URL || "/api";
 console.log("Using API Base URL:", baseURL);
 
 const api = axios.create({
