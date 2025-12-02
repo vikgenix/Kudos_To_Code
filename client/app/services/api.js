@@ -1,10 +1,8 @@
 import axios from "axios";
 
-const backendUrl = process.env.NEXT_PUBLIC_BACKEND_API_URL || "http://localhost:5000";
-const baseURL = backendUrl.endsWith("/api") ? backendUrl : `${backendUrl}/api`;
-// const baseURL = "http://localhost:5000/api";
-
-console.log("API Base URL:", baseURL);
+// Use relative URL to leverage Next.js proxy
+const baseURL = "/api";
+console.log("Using API Base URL:", baseURL);
 
 const api = axios.create({
   baseURL,
@@ -29,5 +27,15 @@ api.interceptors.response.use(
     return Promise.reject(error);
   }
 );
+
+export const fetchSheets = () => api.get("/sheets");
+export const fetchSheetById = (id) => api.get(`/sheets/${id}`);
+export const createSheet = (data) => api.post("/sheets", data);
+export const updateSheet = (id, data) => api.put(`/sheets/${id}`, data);
+export const deleteSheet = (id) => api.delete(`/sheets/${id}`);
+
+export const addProblem = (sheetId, data) => api.post(`/sheets/${sheetId}/problems`, data);
+export const deleteProblem = (id) => api.delete(`/sheets/problems/${id}`);
+export const toggleProblemStatus = (problemId) => api.put(`/sheets/problems/${problemId}/toggle`);
 
 export default api;

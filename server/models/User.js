@@ -9,6 +9,10 @@ const userSchema = new mongoose.Schema({
   password: { type: String, required: true },
   leetcodeUsername: { type: String },
   codeforcesUsername: { type: String },
+  completedProblems: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Problem",
+  }],
 });
 
 

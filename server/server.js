@@ -46,6 +46,7 @@ app.use((req, res, next) => {
 // Step 4: Mount auth routes
 // All auth-related routes will start with /api/auth
 app.use("/api/auth", require("./routes/auth"));
+app.use("/api/sheets", require("./routes/sheetRoutes"));
 
 // Step 5: Default route to test server
 app.get("/", (req, res) => {

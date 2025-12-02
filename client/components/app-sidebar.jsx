@@ -57,7 +57,7 @@ const data = {
     },
     {
       title: "Sheets",
-      url: "/dashboard/sheets",
+      url: "/sheets",
       icon: IconFile,
     },
   ],
