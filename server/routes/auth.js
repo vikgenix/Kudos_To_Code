@@ -15,4 +15,7 @@ router.post("/login", authController.login);
 // Only accessible to authenticated users with a valid JWT
 router.get("/profile", authMiddleware, authController.profile);
 
+// Step 4: Update profile route
+router.put("/profile", authMiddleware, authController.updateProfile);
+
 module.exports = router;

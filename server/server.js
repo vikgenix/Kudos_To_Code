@@ -29,15 +29,19 @@ const cors = require("cors");
 
 const app = express();
 
-app.use(
-  cors()
-);
+app.use(cors());
 
 // Step 2: Connect to MongoDB
 connectDB();
 
 // Step 3: Middleware to parse JSON request bodies
 app.use(express.json());
+
+// Logging Middleware
+app.use((req, res, next) => {
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
+  next();
+});
 
 // Step 4: Mount auth routes
 // All auth-related routes will start with /api/auth

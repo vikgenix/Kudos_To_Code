@@ -60,10 +60,51 @@ exports.login = async (req, res) => {
 };
 
 // Protected profile route
-exports.profile = (req, res) => {
-  // req.user is set by auth middleware after token verification
-  res.json({
-    message: "Welcome to your profile!",
-    user: req.user,
-  });
+exports.profile = async (req, res) => {
+  try {
+    // req.user is set by auth middleware after token verification
+    const user = await User.findById(req.user.id).select("-password"); // Exclude password
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    res.json({
+      message: "Welcome to your profile!",
+      user,
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// Update user profile
+exports.updateProfile = async (req, res) => {
+  try {
+    const { leetcodeUsername, codeforcesUsername } = req.body;
+    const userId = req.user.id;
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    if (leetcodeUsername !== undefined)
+      user.leetcodeUsername = leetcodeUsername;
+    if (codeforcesUsername !== undefined)
+      user.codeforcesUsername = codeforcesUsername;
+
+    await user.save();
+
+    res.json({
+      message: "Profile updated successfully!",
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        leetcodeUsername: user.leetcodeUsername,
+        codeforcesUsername: user.codeforcesUsername,
+      },
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 };
