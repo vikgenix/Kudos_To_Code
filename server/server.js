@@ -29,7 +29,12 @@ const cors = require("cors");
 
 const app = express();
 
-app.use(cors());
+app.use(cors(
+  {
+    origin: process.env.FRONTEND_URL,
+    credentials: true,
+  }
+));
 
 // Step 2: Connect to MongoDB
 connectDB();
@@ -51,6 +56,23 @@ app.use("/api/sheets", require("./routes/sheetRoutes"));
 // Step 5: Default route to test server
 app.get("/", (req, res) => {
   res.send("Hello World! Your server is working 🚀");
+});
+
+// Health check endpoint
+app.get("/api/health", (req, res) => {
+  const mongoose = require("mongoose");
+  const dbStatus = mongoose.connection.readyState;
+  const statusMap = {
+    0: "Disconnected",
+    1: "Connected",
+    2: "Connecting",
+    3: "Disconnecting",
+  };
+  res.json({
+    server: "Running",
+    database: statusMap[dbStatus] || "Unknown",
+    timestamp: new Date().toISOString(),
+  });
 });
 
 // Step 6: Start server on PORT from .env or default 5000
