@@ -28,60 +28,10 @@ import {
   PieChart,
   Pie,
   Cell,
-  Legend as RechartsLegend,
 } from "recharts";
-
-// --- Mock Data & Helpers ---
-
-const mockData = {
-  profile: {
-    name: "Vikrant Yadav",
-    username: "@vikgenix",
-    avatar:
-      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSlu5rvfyq864vn584SBw4r5X9YyeqcSxqnoQ&s",
-    title: "Software Engineer @JaneStreet | NST'28 | ICPC Finalist",
-    bio: "Passionate about distributed systems and competitive programming. Building open source tools for developer productivity.",
-    location: "India",
-    institution: "Newton School of Technology",
-    lastRefresh: "Just now",
-    profileViews: 1205,
-  },
-  stats: {
-    totalQuestions: 1010,
-    totalActiveDays: 348,
-    totalContests: 16,
-    submissions6Months: 152,
-    maxStreak: 72,
-    currentStreak: 13,
-  },
-  ratingHistory: [
-    { date: "Jan", rating: 1200 },
-    { date: "Feb", rating: 1350 },
-    { date: "Mar", rating: 1300 },
-    { date: "Apr", rating: 1480 },
-    { date: "May", rating: 1600 },
-    { date: "Jun", rating: 1580 },
-    { date: "Jul", rating: 1750 },
-    { date: "Aug", rating: 1900 },
-    { date: "Sep", rating: 2000 },
-  ],
-  problems: {
-    fundamentals: [
-      { name: "Leetcode", value: 45, color: "#16a34a" }, // green-600
-      { name: "Codeforces", value: 82, color: "#ca8a04" }, // yellow-600
-    ],
-    dsa: [
-      { name: "Easy", value: 40, color: "#22c55e" }, // green-500
-      { name: "Medium", value: 110, color: "#eab308" }, // yellow-500
-      { name: "Hard", value: 50, color: "#ef4444" }, // red-500
-    ],
-  },
-  platforms: [
-    { name: "LeetCode", handle: "vikgenix", rating: 1950, connected: true },
-    { name: "CodeForces", handle: "vikgenix", rating: 1400, connected: true },
-    { name: "GitHub", handle: "@vikgenix", stars: 450, connected: true },
-  ],
-};
+import { useAuth } from "@/app/context/AuthContext";
+import { UsernameModal } from "@/components/UsernameModal";
+import { authService } from "@/app/services/authService";
 
 // --- Internal UI Components (ShadCN Style) ---
 
@@ -175,23 +125,23 @@ const Separator = ({ className = "" }) => (
 
 // --- Custom Charts & Maps ---
 
-const ActivityHeatmap = () => {
-  const generateData = () => {
-    const weeks = [];
-    for (let i = 0; i < 52; i++) {
-      const days = [];
-      for (let j = 0; j < 7; j++) {
-        const bias = i > 30 ? 0.6 : 0.3;
-        const level =
-          Math.random() > 1 - bias ? Math.floor(Math.random() * 4) + 1 : 0;
-        days.push(level);
-      }
-      weeks.push(days);
-    }
-    return weeks;
-  };
+const ActivityHeatmap = ({ data }) => {
+  // Generate last 365 days
+  const today = new Date();
+  const days = [];
+  for (let i = 364; i >= 0; i--) {
+    const d = new Date(today);
+    d.setDate(d.getDate() - i);
+    days.push(d.toISOString().split("T")[0]);
+  }
 
-  const [data] = useState(generateData());
+  const getLevel = (count) => {
+    if (count === 0) return 0;
+    if (count <= 2) return 1;
+    if (count <= 5) return 2;
+    if (count <= 9) return 3;
+    return 4;
+  };
 
   const getColor = (level) => {
     switch (level) {
@@ -208,34 +158,37 @@ const ActivityHeatmap = () => {
     }
   };
 
+  // Group days into weeks for vertical column layout
+  const weeks = [];
+  let currentWeek = [];
+
+  days.forEach((dateStr) => {
+    const dayData = data?.[dateStr] || { count: 0, lc: 0, cf: 0 };
+    currentWeek.push({ date: dateStr, ...dayData });
+
+    if (currentWeek.length === 7) {
+      weeks.push(currentWeek);
+      currentWeek = [];
+    }
+  });
+  if (currentWeek.length > 0) weeks.push(currentWeek);
+
   return (
     <div className="w-full overflow-hidden">
-      {/* Added touch scrolling and max-width handling */}
       <div className="flex gap-[3px] overflow-x-auto pb-2 no-scrollbar touch-pan-x">
-        {data.map((week, wIdx) => (
+        {weeks.map((week, wIdx) => (
           <div key={wIdx} className="flex flex-col gap-[3px] shrink-0">
             {week.map((day, dIdx) => (
               <div
                 key={`${wIdx}-${dIdx}`}
                 className={`h-2.5 w-2.5 rounded-[2px] ${getColor(
-                  day
+                  getLevel(day.count)
                 )} transition-all hover:ring-2 hover:ring-slate-400 cursor-pointer`}
-                title={`${day > 0 ? day * 3 : "No"} submissions`}
+                title={`${day.date}: ${day.count} submissions (${day.lc} LC, ${day.cf} CF)`}
               />
             ))}
           </div>
         ))}
-      </div>
-      <div className="mt-2 flex items-center justify-end gap-2 text-[10px] text-slate-500">
-        <span>Less</span>
-        <div className="flex gap-[2px]">
-          <div className="h-2.5 w-2.5 rounded-[2px] bg-slate-100" />
-          <div className="h-2.5 w-2.5 rounded-[2px] bg-green-200" />
-          <div className="h-2.5 w-2.5 rounded-[2px] bg-green-400" />
-          <div className="h-2.5 w-2.5 rounded-[2px] bg-green-600" />
-          <div className="h-2.5 w-2.5 rounded-[2px] bg-green-800" />
-        </div>
-        <span>More</span>
       </div>
     </div>
   );
@@ -262,6 +215,267 @@ const CustomTooltip = ({ active, payload, label }) => {
 // --- Main App Component ---
 
 export default function Portfolio() {
+  const { user, setUser } = useAuth();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  const [stats, setStats] = useState({
+    totalQuestions: 0,
+    totalActiveDays: 0,
+    totalContests: 0,
+    currentStreak: 0,
+    leetcodeSolved: 0,
+    codeforcesSolved: 0,
+    leetcodeRating: 0,
+    codeforcesRating: 0,
+    leetcodeEasy: 0,
+    leetcodeMedium: 0,
+    leetcodeHard: 0,
+    cfMaxRating: 0,
+  });
+
+  const [ratingHistory, setRatingHistory] = useState([]);
+
+  const [heatmapData, setHeatmapData] = useState({});
+  const [fetchStatus, setFetchStatus] = useState("idle"); // idle, loading, success, error, partial
+
+  useEffect(() => {
+    if (user) {
+      console.log("User loaded:", user);
+      if (!user.leetcodeUsername || !user.codeforcesUsername) {
+        setIsModalOpen(true);
+      } else {
+        fetchData(user.leetcodeUsername, user.codeforcesUsername);
+      }
+    }
+  }, [user]);
+
+  const fetchData = async (leetcodeUsername, codeforcesUsername) => {
+    setLoading(true);
+    setFetchStatus("loading");
+    console.log("Fetching data for:", leetcodeUsername, codeforcesUsername);
+
+    try {
+      // Helper to safely fetch JSON
+      const safeFetch = async (url) => {
+        try {
+          const res = await fetch(url);
+          if (!res.ok) {
+            if (res.status === 429) {
+              console.warn(`Rate limit hit for ${url}`);
+              return "RATE_LIMIT";
+            }
+            throw new Error(`HTTP error! status: ${res.status}`);
+          }
+          return await res.json();
+        } catch (e) {
+          console.error(`Failed to fetch ${url}:`, e);
+          return null;
+        }
+      };
+
+      // Fetch LeetCode Data
+      const lcProfile = await safeFetch(
+        `https://alfa-leetcode-api.onrender.com/${leetcodeUsername}/solved`
+      );
+      const lcContest = await safeFetch(
+        `https://alfa-leetcode-api.onrender.com/${leetcodeUsername}/contest`
+      );
+      const lcCalendar = await safeFetch(
+        `https://alfa-leetcode-api.onrender.com/${leetcodeUsername}/calendar`
+      );
+
+      // Fetch Codeforces Data
+      const cfUser = await safeFetch(
+        `https://codeforces.com/api/user.info?handles=${codeforcesUsername}`
+      );
+      const cfRating = await safeFetch(
+        `https://codeforces.com/api/user.rating?handle=${codeforcesUsername}`
+      );
+      const cfStatus = await safeFetch(
+        `https://codeforces.com/api/user.status?handle=${codeforcesUsername}`
+      );
+
+      console.log("Fetched Data:", {
+        lcProfile,
+        lcContest,
+        lcCalendar,
+        cfUser,
+        cfRating,
+        cfStatus,
+      });
+
+      const isRateLimited = [
+        lcProfile,
+        lcContest,
+        lcCalendar,
+        cfUser,
+        cfRating,
+        cfStatus,
+      ].includes("RATE_LIMIT");
+
+      // Process Data (handle nulls and RATE_LIMIT)
+      const getVal = (obj, path, defaultVal = 0) => {
+        if (obj === "RATE_LIMIT" || obj === null) return defaultVal;
+        return path.split(".").reduce((o, i) => o?.[i], obj) || defaultVal;
+      };
+
+      const leetcodeSolved = getVal(lcProfile, "solvedProblem");
+      const easy = getVal(lcProfile, "easySolved");
+      const medium = getVal(lcProfile, "mediumSolved");
+      const hard = getVal(lcProfile, "hardSolved");
+      const leetcodeRating = Math.round(getVal(lcContest, "contestRating"));
+
+      // Calculate LeetCode Stats
+      let totalActiveDays = getVal(lcCalendar, "totalActiveDays");
+      let maxStreak = 0;
+
+      if (
+        lcCalendar &&
+        lcCalendar !== "RATE_LIMIT" &&
+        lcCalendar.submissionCalendar
+      ) {
+        try {
+          const calendar = JSON.parse(lcCalendar.submissionCalendar);
+          const timestamps = Object.keys(calendar)
+            .map(Number)
+            .sort((a, b) => a - b);
+
+          if (timestamps.length > 0) {
+            let currentStreak = 1;
+            maxStreak = 1;
+
+            // Convert to days to handle potential time differences
+            const toDay = (ts) => Math.floor(ts / 86400);
+
+            for (let i = 1; i < timestamps.length; i++) {
+              const prevDay = toDay(timestamps[i - 1]);
+              const currDay = toDay(timestamps[i]);
+
+              if (currDay === prevDay + 1) {
+                currentStreak++;
+              } else if (currDay > prevDay + 1) {
+                currentStreak = 1;
+              }
+              maxStreak = Math.max(maxStreak, currentStreak);
+            }
+          }
+        } catch (e) {
+          console.error("Failed to parse submission calendar", e);
+        }
+      }
+
+      const cfRatingValue = cfUser?.result?.[0]?.rating || 0;
+      const cfMaxRating = cfUser?.result?.[0]?.maxRating || 0;
+
+      // Calculate Codeforces Solved (Unique)
+      const cfSolvedSet = new Set();
+      if (cfStatus?.status === "OK") {
+        cfStatus.result.forEach((submission) => {
+          if (submission.verdict === "OK") {
+            const key = `${submission.problem.contestId}${submission.problem.index}`;
+            cfSolvedSet.add(key);
+          }
+        });
+      }
+      const codeforcesSolved = cfSolvedSet.size;
+
+      // Construct Rating History
+      const cfHistory =
+        cfRating?.result?.slice(-10).map((contest) => ({
+          date: new Date(
+            contest.ratingUpdateTimeSeconds * 1000
+          ).toLocaleDateString("en-US", { month: "short" }),
+          rating: contest.newRating,
+        })) || [];
+
+      const lcHistory =
+        lcContest?.contestParticipation?.slice(-10).map((contest) => ({
+          date: new Date(contest.contest.startTime * 1000).toLocaleDateString(
+            "en-US",
+            { month: "short" }
+          ),
+          rating: Math.round(contest.rating),
+        })) || [];
+
+      setStats({
+        totalQuestions: leetcodeSolved + codeforcesSolved,
+        totalActiveDays,
+        totalContests:
+          (lcContest?.contestParticipation?.length || 0) +
+          (cfRating?.result?.length || 0),
+        currentStreak: maxStreak,
+        leetcodeSolved,
+        codeforcesSolved,
+        leetcodeRating,
+        codeforcesRating: cfRatingValue,
+        leetcodeEasy: easy,
+        leetcodeMedium: medium,
+        leetcodeHard: hard,
+        cfMaxRating,
+      });
+
+      // Process Heatmap Data
+      const activityMap = {};
+
+      // LeetCode Activity
+      if (
+        lcCalendar &&
+        lcCalendar !== "RATE_LIMIT" &&
+        lcCalendar.submissionCalendar
+      ) {
+        try {
+          const calendar = JSON.parse(lcCalendar.submissionCalendar);
+          Object.entries(calendar).forEach(([ts, count]) => {
+            const date = new Date(parseInt(ts) * 1000)
+              .toISOString()
+              .split("T")[0];
+            if (!activityMap[date])
+              activityMap[date] = { count: 0, lc: 0, cf: 0 };
+            activityMap[date].count += count;
+            activityMap[date].lc += count;
+          });
+        } catch (e) {
+          console.error("Error parsing LC calendar", e);
+        }
+      }
+
+      // Codeforces Activity
+      if (cfStatus?.status === "OK") {
+        cfStatus.result.forEach((sub) => {
+          const date = new Date(sub.creationTimeSeconds * 1000)
+            .toISOString()
+            .split("T")[0];
+          if (!activityMap[date])
+            activityMap[date] = { count: 0, lc: 0, cf: 0 };
+          activityMap[date].count += 1;
+          activityMap[date].cf += 1;
+        });
+      }
+
+      setHeatmapData(activityMap);
+      setRatingHistory({ cf: cfHistory, lc: lcHistory });
+      setFetchStatus(isRateLimited ? "partial" : "success");
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      setFetchStatus("error");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleUsernameSubmit = async (usernames) => {
+    try {
+      const res = await authService.updateProfile(usernames);
+      setUser(res.data.user);
+      fetchData(usernames.leetcodeUsername, usernames.codeforcesUsername);
+    } catch (error) {
+      console.error("Update failed", error);
+    }
+  };
+
+  if (!user) return null;
+
   return (
     <SidebarProvider
       style={{
@@ -273,10 +487,41 @@ export default function Portfolio() {
       <SidebarInset>
         <SiteHeader headerTitle="Portfolio" />
         <div className="min-h-screen bg-slate-50/50 pb-10 text-slate-900 font-sans">
-          {/* Changed md:grid-cols-12 to lg:grid-cols-12 to force stacking on tablet size */}
           <main className="container mx-auto grid grid-cols-1 gap-6 px-4 py-8 lg:grid-cols-12 md:px-6 lg:py-10">
+            {/* Status Banner */}
+            {fetchStatus === "partial" && (
+              <div className="lg:col-span-12 bg-yellow-100 text-yellow-800 px-4 py-2 rounded-md text-sm flex items-center justify-between">
+                <span>
+                  Some data could not be fetched due to API rate limits. Showing
+                  partial data.
+                </span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() =>
+                    fetchData(user.leetcodeUsername, user.codeforcesUsername)
+                  }
+                >
+                  Retry
+                </Button>
+              </div>
+            )}
+            {fetchStatus === "error" && (
+              <div className="lg:col-span-12 bg-red-100 text-red-800 px-4 py-2 rounded-md text-sm flex items-center justify-between">
+                <span>Failed to fetch data. Please check your connection.</span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() =>
+                    fetchData(user.leetcodeUsername, user.codeforcesUsername)
+                  }
+                >
+                  Retry
+                </Button>
+              </div>
+            )}
+
             {/* Left Column: Profile */}
-            {/* Changed md:col-span-4 to lg:col-span-3 */}
             <div className="lg:col-span-3 space-y-6">
               <Card className="overflow-hidden border-none shadow-md">
                 <div className="h-24 bg-gradient-to-r from-slate-900 to-slate-700"></div>
@@ -284,7 +529,7 @@ export default function Portfolio() {
                   <div className="flex flex-col items-center">
                     <div className="relative">
                       <img
-                        src={mockData.profile.avatar}
+                        src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSlu5rvfyq864vn584SBw4r5X9YyeqcSxqnoQ&s"
                         alt="Profile"
                         className="h-24 w-24 rounded-full border-4 border-white object-cover shadow-sm"
                       />
@@ -292,11 +537,9 @@ export default function Portfolio() {
                     </div>
 
                     <div className="mt-4 text-center">
-                      <h1 className="text-xl font-bold">
-                        {mockData.profile.name}
-                      </h1>
+                      <h1 className="text-xl font-bold">{user.name}</h1>
                       <p className="text-sm font-medium text-slate-500">
-                        {mockData.profile.username}
+                        {user.email}
                       </p>
                     </div>
 
@@ -307,32 +550,6 @@ export default function Portfolio() {
                       </Button>
                     </div>
 
-                    <p className="mt-5 text-center text-sm text-slate-600 leading-relaxed">
-                      {mockData.profile.bio}
-                    </p>
-
-                    <div className="mt-6 w-full space-y-3 text-sm text-slate-500">
-                      <div className="flex items-center gap-2">
-                        <MapPin className="h-4 w-4 text-slate-400" />
-                        <span>{mockData.profile.location}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <GraduationCap className="h-4 w-4 text-slate-400" />
-                        <span className="truncate">
-                          {mockData.profile.institution}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <ExternalLink className="h-4 w-4 text-slate-400" />
-                        <a
-                          href="#"
-                          className="hover:underline hover:text-blue-600"
-                        >
-                          vikgenix.dev
-                        </a>
-                      </div>
-                    </div>
-
                     <Separator className="my-6" />
 
                     <div className="w-full space-y-4">
@@ -340,18 +557,24 @@ export default function Portfolio() {
                         Connected Accounts
                       </h4>
                       <div className="space-y-3">
-                        {mockData.platforms.map((platform) => (
-                          <div
-                            key={platform.name}
-                            className="flex items-center justify-between text-sm"
-                          >
-                            <div className="flex items-center gap-2">
-                              <Terminal className="h-3.5 w-3.5" />
-                              <span>{platform.name}</span>
-                            </div>
-                            <ExternalLink className="h-3 w-3 text-slate-400 cursor-pointer hover:text-slate-900" />
+                        <div className="flex items-center justify-between text-sm">
+                          <div className="flex items-center gap-2">
+                            <Terminal className="h-3.5 w-3.5" />
+                            <span>LeetCode</span>
                           </div>
-                        ))}
+                          <span className="text-xs text-slate-500">
+                            {user.leetcodeUsername}
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between text-sm">
+                          <div className="flex items-center gap-2">
+                            <Terminal className="h-3.5 w-3.5" />
+                            <span>Codeforces</span>
+                          </div>
+                          <span className="text-xs text-slate-500">
+                            {user.codeforcesUsername}
+                          </span>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -360,24 +583,35 @@ export default function Portfolio() {
 
               <Card className="bg-gradient-to-br from-slate-900 to-slate-800 text-white border-none shadow-lg">
                 <CardContent className="pt-6">
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <p className="text-slate-400 text-xs font-medium uppercase tracking-wider">
-                        Current Rank
-                      </p>
-                      <h3 className="text-3xl font-bold mt-1 text-white">
-                        2000
-                      </h3>
-                      <p className="text-emerald-400 text-xs mt-1 font-medium flex items-center gap-1">
-                        <Target className="h-3 w-3" /> Top 2.5% Global
-                      </p>
+                  <div className="space-y-6">
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <p className="text-slate-400 text-xs font-medium uppercase tracking-wider">
+                          Codeforces Rating
+                        </p>
+                        <h3 className="text-3xl font-bold mt-1 text-white">
+                          {stats.codeforcesRating}
+                        </h3>
+                        <p className="text-slate-400 text-xs mt-1">
+                          Max:{" "}
+                          <span className="text-white font-medium">
+                            {stats.cfMaxRating}
+                          </span>
+                        </p>
+                      </div>
+                      <Trophy className="h-8 w-8 text-yellow-500" />
                     </div>
-                    <Trophy className="h-8 w-8 text-yellow-500" />
-                  </div>
-                  <div className="mt-6 pt-4 border-t border-slate-700/50">
-                    <div className="flex justify-between text-sm">
-                      <span className="text-slate-400">Highest Rating</span>
-                      <span className="font-semibold">2145</span>
+
+                    <div className="pt-4 border-t border-slate-700/50 flex items-start justify-between">
+                      <div>
+                        <p className="text-slate-400 text-xs font-medium uppercase tracking-wider">
+                          LeetCode Rating
+                        </p>
+                        <h3 className="text-3xl font-bold mt-1 text-white">
+                          {stats.leetcodeRating}
+                        </h3>
+                      </div>
+                      <Code2 className="h-8 w-8 text-green-500" />
                     </div>
                   </div>
                 </CardContent>
@@ -385,7 +619,6 @@ export default function Portfolio() {
             </div>
 
             {/* Right Column: Content */}
-            {/* Changed md:col-span-8 to lg:col-span-9 */}
             <div className="lg:col-span-9 space-y-6">
               {/* Top Key Stats */}
               <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
@@ -394,11 +627,11 @@ export default function Portfolio() {
                     <div className="flex items-center gap-2 text-slate-500 mb-2">
                       <Target className="h-4 w-4" />
                       <span className="text-xs font-medium uppercase">
-                        Solved
+                        Total Solved
                       </span>
                     </div>
                     <div className="text-2xl font-bold">
-                      {mockData.stats.totalQuestions}
+                      {stats.totalQuestions}
                     </div>
                   </CardContent>
                 </Card>
@@ -407,11 +640,11 @@ export default function Portfolio() {
                     <div className="flex items-center gap-2 text-slate-500 mb-2">
                       <Flame className="h-4 w-4 text-orange-500" />
                       <span className="text-xs font-medium uppercase">
-                        Streak
+                        Max Streak
                       </span>
                     </div>
                     <div className="text-2xl font-bold">
-                      {mockData.stats.currentStreak}{" "}
+                      {stats.currentStreak}{" "}
                       <span className="text-sm font-normal text-slate-400">
                         days
                       </span>
@@ -427,7 +660,7 @@ export default function Portfolio() {
                       </span>
                     </div>
                     <div className="text-2xl font-bold">
-                      {mockData.stats.totalContests}
+                      {stats.totalContests}
                     </div>
                   </CardContent>
                 </Card>
@@ -440,7 +673,7 @@ export default function Portfolio() {
                       </span>
                     </div>
                     <div className="text-2xl font-bold">
-                      {mockData.stats.totalActiveDays}
+                      {stats.totalActiveDays}
                     </div>
                   </CardContent>
                 </Card>
@@ -457,80 +690,142 @@ export default function Portfolio() {
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <ActivityHeatmap />
+                  <ActivityHeatmap data={heatmapData} />
                 </CardContent>
               </Card>
 
-              {/* Rating Graph */}
-              <Card className="border shadow-sm">
-                <CardHeader>
-                  <CardTitle className="text-base font-semibold">
-                    Rating History
-                  </CardTitle>
-                  <p className="text-sm text-slate-500">
-                    Performance analysis across all contest platforms.
-                  </p>
-                </CardHeader>
-                <CardContent className="pl-0">
-                  <div className="h-[250px] w-full">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <AreaChart
-                        data={mockData.ratingHistory}
-                        margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
-                      >
-                        <defs>
-                          <linearGradient
-                            id="colorRating"
-                            x1="0"
-                            y1="0"
-                            x2="0"
-                            y2="1"
-                          >
-                            <stop
-                              offset="5%"
-                              stopColor="#2563eb"
-                              stopOpacity={0.2}
-                            />
-                            <stop
-                              offset="95%"
-                              stopColor="#2563eb"
-                              stopOpacity={0}
-                            />
-                          </linearGradient>
-                        </defs>
-                        <XAxis
-                          dataKey="date"
-                          tickLine={false}
-                          axisLine={false}
-                          tick={{ fontSize: 12, fill: "#94a3b8" }}
-                          dy={10}
-                        />
-                        <YAxis
-                          hide
-                          domain={["dataMin - 100", "dataMax + 100"]}
-                        />
-                        <CartesianGrid
-                          vertical={false}
-                          strokeDasharray="3 3"
-                          stroke="#e2e8f0"
-                        />
-                        <Tooltip content={<CustomTooltip />} />
-                        <Area
-                          type="monotone"
-                          dataKey="rating"
-                          stroke="#2563eb"
-                          strokeWidth={2}
-                          fillOpacity={1}
-                          fill="url(#colorRating)"
-                        />
-                      </AreaChart>
-                    </ResponsiveContainer>
-                  </div>
-                </CardContent>
-              </Card>
+              {/* Rating Graphs */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <Card className="border shadow-sm">
+                  <CardHeader>
+                    <CardTitle className="text-base font-semibold text-yellow-600">
+                      Codeforces Rating
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="pl-0">
+                    <div className="h-[200px] w-full">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <AreaChart
+                          data={ratingHistory.cf}
+                          margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
+                        >
+                          <defs>
+                            <linearGradient
+                              id="colorRatingCF"
+                              x1="0"
+                              y1="0"
+                              x2="0"
+                              y2="1"
+                            >
+                              <stop
+                                offset="5%"
+                                stopColor="#ca8a04"
+                                stopOpacity={0.2}
+                              />
+                              <stop
+                                offset="95%"
+                                stopColor="#ca8a04"
+                                stopOpacity={0}
+                              />
+                            </linearGradient>
+                          </defs>
+                          <XAxis
+                            dataKey="date"
+                            tickLine={false}
+                            axisLine={false}
+                            tick={{ fontSize: 12, fill: "#94a3b8" }}
+                            dy={10}
+                          />
+                          <YAxis
+                            hide
+                            domain={["dataMin - 50", "dataMax + 50"]}
+                          />
+                          <CartesianGrid
+                            vertical={false}
+                            strokeDasharray="3 3"
+                            stroke="#e2e8f0"
+                          />
+                          <Tooltip content={<CustomTooltip />} />
+                          <Area
+                            type="monotone"
+                            dataKey="rating"
+                            stroke="#ca8a04"
+                            strokeWidth={2}
+                            fillOpacity={1}
+                            fill="url(#colorRatingCF)"
+                          />
+                        </AreaChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="border shadow-sm">
+                  <CardHeader>
+                    <CardTitle className="text-base font-semibold text-green-600">
+                      LeetCode Rating
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="pl-0">
+                    <div className="h-[200px] w-full">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <AreaChart
+                          data={ratingHistory.lc}
+                          margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
+                        >
+                          <defs>
+                            <linearGradient
+                              id="colorRatingLC"
+                              x1="0"
+                              y1="0"
+                              x2="0"
+                              y2="1"
+                            >
+                              <stop
+                                offset="5%"
+                                stopColor="#16a34a"
+                                stopOpacity={0.2}
+                              />
+                              <stop
+                                offset="95%"
+                                stopColor="#16a34a"
+                                stopOpacity={0}
+                              />
+                            </linearGradient>
+                          </defs>
+                          <XAxis
+                            dataKey="date"
+                            tickLine={false}
+                            axisLine={false}
+                            tick={{ fontSize: 12, fill: "#94a3b8" }}
+                            dy={10}
+                          />
+                          <YAxis
+                            hide
+                            domain={["dataMin - 50", "dataMax + 50"]}
+                          />
+                          <CartesianGrid
+                            vertical={false}
+                            strokeDasharray="3 3"
+                            stroke="#e2e8f0"
+                          />
+                          <Tooltip content={<CustomTooltip />} />
+                          <Area
+                            type="monotone"
+                            dataKey="rating"
+                            stroke="#16a34a"
+                            strokeWidth={2}
+                            fillOpacity={1}
+                            fill="url(#colorRatingLC)"
+                          />
+                        </AreaChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
 
               {/* Bottom Grid: Language & Breakdown */}
-              {/* Changed md:grid-cols-2 to lg:grid-cols-2 for better tablet stacking */}
               <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
                 {/* Fundamental Stats */}
                 <Card>
@@ -540,13 +835,23 @@ export default function Portfolio() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    {/* Updated to stack on small screens, row on larger */}
                     <div className="flex flex-col sm:flex-row items-center justify-between gap-6 sm:gap-0">
                       <div className="h-[160px] w-[160px] relative shrink-0">
                         <ResponsiveContainer width="100%" height="100%">
                           <PieChart>
                             <Pie
-                              data={mockData.problems.fundamentals}
+                              data={[
+                                {
+                                  name: "Leetcode",
+                                  value: stats.leetcodeSolved,
+                                  color: "#16a34a",
+                                },
+                                {
+                                  name: "Codeforces",
+                                  value: stats.codeforcesSolved,
+                                  color: "#ca8a04",
+                                },
+                              ]}
                               cx="50%"
                               cy="50%"
                               innerRadius={50}
@@ -555,28 +860,49 @@ export default function Portfolio() {
                               dataKey="value"
                               stroke="none"
                             >
-                              {mockData.problems.fundamentals.map(
-                                (entry, index) => (
-                                  <Cell
-                                    key={`cell-${index}`}
-                                    fill={entry.color}
-                                  />
-                                )
-                              )}
+                              {[
+                                {
+                                  name: "Leetcode",
+                                  value: stats.leetcodeSolved,
+                                  color: "#16a34a",
+                                },
+                                {
+                                  name: "Codeforces",
+                                  value: stats.codeforcesSolved,
+                                  color: "#ca8a04",
+                                },
+                              ].map((entry, index) => (
+                                <Cell
+                                  key={`cell-${index}`}
+                                  fill={entry.color}
+                                />
+                              ))}
                             </Pie>
                             <Tooltip />
                           </PieChart>
                         </ResponsiveContainer>
                         <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                          <span className="text-2xl font-bold">127</span>
+                          <span className="text-2xl font-bold">
+                            {stats.leetcodeSolved + stats.codeforcesSolved}
+                          </span>
                           <span className="text-[10px] text-slate-400 uppercase">
                             Solved
                           </span>
                         </div>
                       </div>
-                      {/* Changed padding to be responsive */}
                       <div className="flex-1 w-full sm:pl-8 space-y-3">
-                        {mockData.problems.fundamentals.map((item) => (
+                        {[
+                          {
+                            name: "Leetcode",
+                            value: stats.leetcodeSolved,
+                            color: "#16a34a",
+                          },
+                          {
+                            name: "Codeforces",
+                            value: stats.codeforcesSolved,
+                            color: "#ca8a04",
+                          },
+                        ].map((item) => (
                           <div
                             key={item.name}
                             className="flex items-center justify-between text-sm"
@@ -608,13 +934,28 @@ export default function Portfolio() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    {/* Updated to stack on small screens, row on larger */}
                     <div className="flex flex-col sm:flex-row items-center justify-between gap-6 sm:gap-0">
                       <div className="h-[160px] w-[160px] relative shrink-0">
                         <ResponsiveContainer width="100%" height="100%">
                           <PieChart>
                             <Pie
-                              data={mockData.problems.dsa}
+                              data={[
+                                {
+                                  name: "Easy",
+                                  value: stats.leetcodeEasy,
+                                  color: "#22c55e",
+                                },
+                                {
+                                  name: "Medium",
+                                  value: stats.leetcodeMedium,
+                                  color: "#eab308",
+                                },
+                                {
+                                  name: "Hard",
+                                  value: stats.leetcodeHard,
+                                  color: "#ef4444",
+                                },
+                              ]}
                               cx="50%"
                               cy="50%"
                               innerRadius={50}
@@ -623,7 +964,23 @@ export default function Portfolio() {
                               dataKey="value"
                               stroke="none"
                             >
-                              {mockData.problems.dsa.map((entry, index) => (
+                              {[
+                                {
+                                  name: "Easy",
+                                  value: stats.leetcodeEasy,
+                                  color: "#22c55e",
+                                },
+                                {
+                                  name: "Medium",
+                                  value: stats.leetcodeMedium,
+                                  color: "#eab308",
+                                },
+                                {
+                                  name: "Hard",
+                                  value: stats.leetcodeHard,
+                                  color: "#ef4444",
+                                },
+                              ].map((entry, index) => (
                                 <Cell
                                   key={`cell-${index}`}
                                   fill={entry.color}
@@ -634,15 +991,32 @@ export default function Portfolio() {
                           </PieChart>
                         </ResponsiveContainer>
                         <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                          <span className="text-2xl font-bold">200</span>
+                          <span className="text-2xl font-bold">
+                            {stats.leetcodeSolved}
+                          </span>
                           <span className="text-[10px] text-slate-400 uppercase">
                             Total
                           </span>
                         </div>
                       </div>
-                      {/* Changed padding to be responsive */}
                       <div className="flex-1 w-full sm:pl-8 space-y-3">
-                        {mockData.problems.dsa.map((item) => (
+                        {[
+                          {
+                            name: "Easy",
+                            value: stats.leetcodeEasy,
+                            color: "#22c55e",
+                          },
+                          {
+                            name: "Medium",
+                            value: stats.leetcodeMedium,
+                            color: "#eab308",
+                          },
+                          {
+                            name: "Hard",
+                            value: stats.leetcodeHard,
+                            color: "#ef4444",
+                          },
+                        ].map((item) => (
                           <div
                             key={item.name}
                             className="flex items-center justify-between text-sm"
@@ -669,9 +1043,12 @@ export default function Portfolio() {
             </div>
           </main>
         </div>
-       
       </SidebarInset>
-      
+      <UsernameModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSubmit={handleUsernameSubmit}
+      />
     </SidebarProvider>
   );
 }
