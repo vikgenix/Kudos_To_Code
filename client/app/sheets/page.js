@@ -20,6 +20,9 @@ import {
   toggleProblemStatus,
   updateSheet,
 } from "../services/api";
+import { AppSidebar } from "@/components/app-sidebar";
+import { SiteHeader } from "@/components/site-header";
+import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 
 // --- UI Components ---
 
@@ -262,6 +265,15 @@ const CodingSheetsApp = () => {
     section: "General",
   });
 
+  // Pagination State
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 9;
+
+  // Reset pagination when search or filter changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, filterType]);
+
   // ... (useEffect and load functions remain same)
   useEffect(() => {
     loadSheets();
@@ -392,6 +404,18 @@ const CodingSheetsApp = () => {
     return true;
   });
 
+  // Pagination Logic
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentSheets = filteredSheets.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(filteredSheets.length / itemsPerPage);
+
+  const handlePageChange = (pageNumber) => {
+    setCurrentPage(pageNumber);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  // Process problems for the selected sheet (Detail View)
   // Processed Sections Logic (Filter & Sort Problems)
   const processedSections = selectedSheetDetail?.sections.map(section => {
     let problems = [...section.problems];
@@ -430,6 +454,15 @@ const CodingSheetsApp = () => {
   });
 
   return (
+    <SidebarProvider
+      style={{
+        "--sidebar-width": "calc(var(--spacing) * 72)",
+        "--header-height": "calc(var(--spacing) * 12)",
+      }}
+    >
+      <AppSidebar variant="inset" />
+      <SidebarInset>
+        <SiteHeader headerTitle="Sheets" />
     <div className="min-h-screen bg-slate-50/50 font-sans text-slate-900 flex flex-col">
       <main className="mx-auto w-full max-w-6xl flex-col gap-4 px-4 py-8 md:py-12 flex-1">
         {/* Header */}
@@ -444,11 +477,13 @@ const CodingSheetsApp = () => {
           </div>
         </header>
 
+
+
         {selectedSheetDetail ? (
           // --- DETAIL VIEW ---
           <section className="space-y-6 animate-in slide-in-from-right-4 duration-300">
-             {/* Top Navigation Bar */}
-             <div className="flex items-center justify-between">
+            {/* Top Navigation Bar */}
+            <div className="flex items-center justify-between">
               <Button
                 variant="ghost"
                 size="sm"
@@ -459,7 +494,7 @@ const CodingSheetsApp = () => {
               </Button>
 
               <div className="flex items-center gap-2">
-                 <Button
+                <Button
                   variant="outline"
                   size="sm"
                   onClick={() => setIsEditOpen(true)}
@@ -485,7 +520,7 @@ const CodingSheetsApp = () => {
               </div>
 
               {/* Edit Sheet Modal */}
-               <Dialog
+              <Dialog
                 open={isEditOpen}
                 onOpenChange={setIsEditOpen}
                 title="Edit Sheet"
@@ -496,7 +531,10 @@ const CodingSheetsApp = () => {
                     <Input
                       value={editSheetData.title}
                       onChange={(e) =>
-                        setEditSheetData({ ...editSheetData, title: e.target.value })
+                        setEditSheetData({
+                          ...editSheetData,
+                          title: e.target.value,
+                        })
                       }
                     />
                   </div>
@@ -565,34 +603,43 @@ const CodingSheetsApp = () => {
                         <option>Hard</option>
                       </Select>
                     </div>
-                     <div className="space-y-2">
+                    <div className="space-y-2">
                       <label className="text-sm font-medium">Section</label>
                       <Select
-                         value={newProblem.section}
-                         onChange={(e) =>
-                           setNewProblem({ ...newProblem, section: e.target.value })
-                         }
+                        value={newProblem.section}
+                        onChange={(e) =>
+                          setNewProblem({
+                            ...newProblem,
+                            section: e.target.value,
+                          })
+                        }
                       >
-                        {selectedSheetDetail.sections && selectedSheetDetail.sections.map(s => (
-                            <option key={s.name} value={s.name}>{s.name}</option>
-                        ))}
-                        {(!selectedSheetDetail.sections || selectedSheetDetail.sections.length === 0) && <option value="General">General</option>}
-                         <option value="New Section">New Section (Auto)</option>
+                        {selectedSheetDetail.sections &&
+                          selectedSheetDetail.sections.map((s) => (
+                            <option key={s.name} value={s.name}>
+                              {s.name}
+                            </option>
+                          ))}
+                        {(!selectedSheetDetail.sections ||
+                          selectedSheetDetail.sections.length === 0) && (
+                          <option value="General">General</option>
+                        )}
+                        <option value="New Section">New Section (Auto)</option>
                       </Select>
                     </div>
                   </div>
-                   <div className="space-y-2">
-                      <label className="text-sm font-medium">
-                        Tags (comma separated)
-                      </label>
-                      <Input
-                        placeholder="Array, DP..."
-                        value={newProblem.tags}
-                        onChange={(e) =>
-                          setNewProblem({ ...newProblem, tags: e.target.value })
-                        }
-                      />
-                    </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">
+                      Tags (comma separated)
+                    </label>
+                    <Input
+                      placeholder="Array, DP..."
+                      value={newProblem.tags}
+                      onChange={(e) =>
+                        setNewProblem({ ...newProblem, tags: e.target.value })
+                      }
+                    />
+                  </div>
                   <Button className="w-full" onClick={handleAddProblem}>
                     Add to Sheet
                   </Button>
@@ -625,9 +672,10 @@ const CodingSheetsApp = () => {
                 {/* Circular Chart Area */}
                 <div className="bg-slate-50/50 p-6 flex flex-col items-center justify-center border-l border-slate-100 min-w-[200px]">
                   <CircularProgress
-                    completed={
-                        selectedSheetDetail.sections.reduce((acc, section) => acc + section.completed, 0)
-                    }
+                    completed={selectedSheetDetail.sections.reduce(
+                      (acc, section) => acc + section.completed,
+                      0
+                    )}
                     total={selectedSheetDetail.questions}
                   />
                   <span className="text-xs text-slate-400 mt-2 font-medium">
@@ -639,36 +687,66 @@ const CodingSheetsApp = () => {
 
             {/* Problem Search/Filter Toolbar */}
             <div className="flex flex-col sm:flex-row gap-3">
-                <div className="relative flex-1">
-                    <Input 
-                        placeholder="Search problems..." 
-                        value={problemSearchQuery}
-                        onChange={(e) => setProblemSearchQuery(e.target.value)}
-                        className="pl-8"
-                    />
-                     <div className="absolute left-2.5 top-2.5 pointer-events-none opacity-50">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-search"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-                    </div>
+              <div className="relative flex-1">
+                <Input
+                  placeholder="Search problems..."
+                  value={problemSearchQuery}
+                  onChange={(e) => setProblemSearchQuery(e.target.value)}
+                  className="pl-8"
+                />
+                <div className="absolute left-2.5 top-2.5 pointer-events-none opacity-50">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="lucide lucide-search"
+                  >
+                    <circle cx="11" cy="11" r="8" />
+                    <path d="m21 21-4.3-4.3" />
+                  </svg>
                 </div>
-                <div className="flex gap-3">
-                    <Select value={problemFilterDifficulty} onChange={(e) => setProblemFilterDifficulty(e.target.value)} className="w-32">
-                        <option value="All">All Difficulty</option>
-                        <option value="Easy">Easy</option>
-                        <option value="Medium">Medium</option>
-                        <option value="Hard">Hard</option>
-                    </Select>
-                    <Select value={problemFilterStatus} onChange={(e) => setProblemFilterStatus(e.target.value)} className="w-32">
-                        <option value="All">All Status</option>
-                        <option value="Completed">Completed</option>
-                        <option value="Pending">Pending</option>
-                    </Select>
-                     <Select value={problemSortBy} onChange={(e) => setProblemSortBy(e.target.value)} className="w-40">
-                        <option value="Default">Default Sort</option>
-                        <option value="Difficulty (Asc)">Difficulty (Easy-Hard)</option>
-                        <option value="Difficulty (Desc)">Difficulty (Hard-Easy)</option>
-                        <option value="Title (Asc)">Title (A-Z)</option>
-                    </Select>
-                </div>
+              </div>
+              <div className="flex gap-3">
+                <Select
+                  value={problemFilterDifficulty}
+                  onChange={(e) => setProblemFilterDifficulty(e.target.value)}
+                  className="w-32"
+                >
+                  <option value="All">All Difficulty</option>
+                  <option value="Easy">Easy</option>
+                  <option value="Medium">Medium</option>
+                  <option value="Hard">Hard</option>
+                </Select>
+                <Select
+                  value={problemFilterStatus}
+                  onChange={(e) => setProblemFilterStatus(e.target.value)}
+                  className="w-32"
+                >
+                  <option value="All">All Status</option>
+                  <option value="Completed">Completed</option>
+                  <option value="Pending">Pending</option>
+                </Select>
+                <Select
+                  value={problemSortBy}
+                  onChange={(e) => setProblemSortBy(e.target.value)}
+                  className="w-40"
+                >
+                  <option value="Default">Default Sort</option>
+                  <option value="Difficulty (Asc)">
+                    Difficulty (Easy-Hard)
+                  </option>
+                  <option value="Difficulty (Desc)">
+                    Difficulty (Hard-Easy)
+                  </option>
+                  <option value="Title (Asc)">Title (A-Z)</option>
+                </Select>
+              </div>
             </div>
 
             {/* Problem List */}
@@ -763,7 +841,11 @@ const CodingSheetsApp = () => {
                       </div>
                     ) : (
                       <div className="p-8 text-center text-slate-400 text-sm italic">
-                        {problemSearchQuery || problemFilterDifficulty !== "All" || problemFilterStatus !== "All" ? "No matching problems found in this section." : "No problems added yet. Click \"Add Problem\" to get started."}
+                        {problemSearchQuery ||
+                        problemFilterDifficulty !== "All" ||
+                        problemFilterStatus !== "All"
+                          ? "No matching problems found in this section."
+                          : 'No problems added yet. Click "Add Problem" to get started.'}
                       </div>
                     )}
                   </CardContent>
@@ -785,31 +867,48 @@ const CodingSheetsApp = () => {
               </div>
 
               <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
-                 {/* Search Bar */}
+                {/* Search Bar */}
                 <div className="relative w-full sm:w-64">
-                    <Input 
-                        placeholder="Search sheets..." 
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        className="pl-8"
-                    />
-                     <div className="absolute left-2.5 top-2.5 pointer-events-none opacity-50">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-search"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-                    </div>
+                  <Input
+                    placeholder="Search sheets..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-8"
+                  />
+                  <div className="absolute left-2.5 top-2.5 pointer-events-none opacity-50">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="lucide lucide-search"
+                    >
+                      <circle cx="11" cy="11" r="8" />
+                      <path d="m21 21-4.3-4.3" />
+                    </svg>
+                  </div>
                 </div>
 
                 {/* Filter Dropdown */}
                 <div className="w-full sm:w-40">
-                    <Select value={filterType} onChange={(e) => setFilterType(e.target.value)}>
-                        <option value="all">All Sheets</option>
-                        <option value="public">Public Only</option>
-                        <option value="private">Private Only</option>
-                    </Select>
+                  <Select
+                    value={filterType}
+                    onChange={(e) => setFilterType(e.target.value)}
+                  >
+                    <option value="all">All Sheets</option>
+                    <option value="public">Public Only</option>
+                    <option value="private">Private Only</option>
+                  </Select>
                 </div>
 
                 <Button size="sm" onClick={() => setIsAddOpen(true)}>
-                    <Plus className="mr-2 h-4 w-4" />
-                    New Sheet
+                  <Plus className="mr-2 h-4 w-4" />
+                  New Sheet
                 </Button>
               </div>
 
@@ -857,69 +956,110 @@ const CodingSheetsApp = () => {
               </Dialog>
             </div>
 
-            {filteredSheets.length > 0 ? (
-              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                {filteredSheets.map((sheet) => {
-                  return (
-                    <Card
-                      key={sheet._id}
-                      className="cursor-pointer transition-all duration-200 hover:shadow-md hover:border-slate-300 group flex flex-col"
-                      onClick={() => setSelectedSheetId(sheet._id)}
-                    >
-                      <CardHeader className="pb-3 flex-1">
-                        <div className="flex items-start justify-between gap-2">
-                          <div>
-                            <CardTitle className="text-base group-hover:text-blue-600 transition-colors">
-                              {sheet.title}
-                            </CardTitle>
-                            <p className="mt-1 text-xs text-slate-500">
-                              {sheet.followers.toLocaleString()} followers
-                            </p>
+            {currentSheets.length > 0 ? (
+              <>
+                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                  {currentSheets.map((sheet) => {
+                    return (
+                      <Card
+                        key={sheet._id}
+                        className="cursor-pointer transition-all duration-200 hover:shadow-md hover:border-slate-300 group flex flex-col"
+                        onClick={() => setSelectedSheetId(sheet._id)}
+                      >
+                        <CardHeader className="pb-3 flex-1">
+                          <div className="flex items-start justify-between gap-2">
+                            <div>
+                              <CardTitle className="text-base group-hover:text-blue-600 transition-colors">
+                                {sheet.title}
+                              </CardTitle>
+                              <p className="mt-1 text-xs text-slate-500">
+                                {sheet.followers.toLocaleString()} followers
+                              </p>
+                            </div>
+                            {sheet.progress > 0 && (
+                              <Badge
+                                variant="secondary"
+                                className={`text-xs ${
+                                  sheet.progress === 100
+                                    ? "bg-green-100 text-green-800"
+                                    : ""
+                                }`}
+                              >
+                                {sheet.progress}%
+                              </Badge>
+                            )}
                           </div>
-                          {sheet.progress > 0 && (
-                            <Badge
-                              variant="secondary"
-                              className={`text-xs ${
-                                sheet.progress === 100
-                                  ? "bg-green-100 text-green-800"
-                                  : ""
-                              }`}
-                            >
-                              {sheet.progress}%
-                            </Badge>
-                          )}
+                          <CardDescription className="line-clamp-2 text-xs leading-relaxed mt-2">
+                            {sheet.description}
+                          </CardDescription>
+                        </CardHeader>
+                        <CardFooter className="flex items-center justify-between pt-2 border-t border-slate-50 bg-slate-50/50 rounded-b-xl py-3">
+                          <div className="flex items-center gap-1.5 text-xs text-slate-500 font-medium">
+                            <BookOpen className="h-3.5 w-3.5" />
+                            <span>{sheet.questions} questions</span>
+                          </div>
+                          <div className="text-xs font-medium text-slate-900 flex items-center gap-1 group-hover:translate-x-1 transition-transform">
+                            View <ChevronLeft className="h-3 w-3 rotate-180" />
+                          </div>
+                        </CardFooter>
+                        {/* Progress Bar Line at Bottom */}
+                        <div className="h-1 w-full bg-slate-100">
+                          <div
+                            className="h-full bg-green-500 transition-all duration-500"
+                            style={{ width: `${sheet.progress}%` }}
+                          />
                         </div>
-                        <CardDescription className="line-clamp-2 text-xs leading-relaxed mt-2">
-                          {sheet.description}
-                        </CardDescription>
-                      </CardHeader>
-                      <CardFooter className="flex items-center justify-between pt-2 border-t border-slate-50 bg-slate-50/50 rounded-b-xl py-3">
-                        <div className="flex items-center gap-1.5 text-xs text-slate-500 font-medium">
-                          <BookOpen className="h-3.5 w-3.5" />
-                          <span>{sheet.questions} questions</span>
-                        </div>
-                        <div className="text-xs font-medium text-slate-900 flex items-center gap-1 group-hover:translate-x-1 transition-transform">
-                          View <ChevronLeft className="h-3 w-3 rotate-180" />
-                        </div>
-                      </CardFooter>
-                      {/* Progress Bar Line at Bottom */}
-                      <div className="h-1 w-full bg-slate-100">
-                        <div
-                          className="h-full bg-green-500 transition-all duration-500"
-                          style={{ width: `${sheet.progress}%` }}
-                        />
-                      </div>
-                    </Card>
-                  );
-                })}
-              </div>
+                      </Card>
+                    );
+                  })}
+                </div>
+
+                {/* Pagination Controls */}
+                {totalPages > 1 && (
+                  <div className="flex items-center justify-center gap-2 mt-8">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handlePageChange(currentPage - 1)}
+                      disabled={currentPage === 1}
+                    >
+                      Previous
+                    </Button>
+                    <div className="flex items-center gap-1">
+                      {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                        (page) => (
+                          <Button
+                            key={page}
+                            variant={currentPage === page ? "default" : "ghost"}
+                            size="sm"
+                            className="w-8 h-8 p-0"
+                            onClick={() => handlePageChange(page)}
+                          >
+                            {page}
+                          </Button>
+                        )
+                      )}
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handlePageChange(currentPage + 1)}
+                      disabled={currentPage === totalPages}
+                    >
+                      Next
+                    </Button>
+                  </div>
+                )}
+              </>
             ) : (
               <div className="text-center py-12 border-2 border-dashed border-slate-200 rounded-xl bg-slate-50">
                 <h3 className="text-lg font-medium text-slate-900">
                   No Sheets Found
                 </h3>
                 <p className="text-slate-500 text-sm mt-1">
-                  {searchQuery ? "Try adjusting your search or filters." : "Create a new custom sheet to get started."}
+                  {searchQuery
+                    ? "Try adjusting your search or filters."
+                    : "Create a new custom sheet to get started."}
                 </p>
               </div>
             )}
@@ -927,6 +1067,8 @@ const CodingSheetsApp = () => {
         )}
       </main>
     </div>
+      </SidebarInset>
+    </SidebarProvider>
   );
 };
 
