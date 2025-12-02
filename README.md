@@ -1,189 +1,207 @@
 # 🚀 Kudos to Code — Coding Profile Builder
 
-A unified platform that aggregates your coding journey — projects, stats, and competitive programming profiles — into one dynamic portfolio.
-Showcase your achievements, GitHub activity, and competitive programming stats from platforms like LeetCode, Codeforces, and more, all with a single, shareable link.
+![License](https://img.shields.io/badge/license-ISC-blue.svg)
+![Node](https://img.shields.io/badge/node-v20%2B-green)
+![Next.js](https://img.shields.io/badge/Next.js-16.0-black)
+![MongoDB](https://img.shields.io/badge/MongoDB-Atlas-green)
+
+**Kudos to Code** is a unified platform that aggregates your coding journey—projects, stats, and competitive programming profiles—into one dynamic portfolio. Showcase your achievements, GitHub activity, and competitive programming stats from platforms like LeetCode and Codeforces, all with a single, shareable link.
+
+---
 
 ## 🧩 Problem Statement
 
-Developers today have their work scattered across platforms — GitHub for projects, LeetCode for problems, Codeforces for contests, etc.
-Kudos to Code solves this by creating a centralized, unified profile builder that brings together all your coding stats, projects, and achievements into a sleek, personalized portfolio.
+Developers today have their work scattered across multiple platforms:
+- **GitHub** for projects and source code.
+- **LeetCode** for data structures and algorithms.
+- **Codeforces** for competitive programming contests.
 
-“One profile. One link. Your entire coding identity.”
+Recruiters and peers often struggle to view a candidate's complete technical capability in one place. **Kudos to Code** solves this by creating a centralized, unified profile builder that brings together all your coding stats, curated problem sheets, and achievements into a sleek, personalized portfolio.
 
-## 🏗️ System Architecture
+> "One profile. One link. Your entire coding identity."
 
-Kudos to Code follows a modern decoupled architecture ensuring scalability, speed, and maintainability.
+---
 
-Next.js (Frontend) → Node.js + Express (Backend) → MongoDB (Database)
-
-
-Frontend: Next.js app (Server-Side Rendering for fast, SEO-friendly pages)
-
-Backend: Node.js with Express — handles API requests, authentication, and CRUD operations
-
-Database: MongoDB Atlas — stores user profiles, projects, and stats data
-
-## ⚙️ Tech Stack
-Layer	Technology	Description
-Frontend	Next.js
-	React framework with SSR for performance and SEO
-Backend	Node.js
- + Express.js
-	REST API for profiles, authentication & data integration
-Database	MongoDB Atlas
-	Flexible, scalable document-based database
-Authentication	JWT
-	JSON Web Tokens for secure authentication
-Hosting	Frontend: Vercel
-
-Backend: Render
-
-Database: MongoDB Atlas
-	
 ## 🔑 Key Features
-Feature	Description
-🔐 Auth & Authorization	Custom JWT-based login & registration system for secure API access
-🧾 CRUD Operations	Create, read, update, and delete personal profiles and showcased projects
-🧭 Frontend Routing	Seamless navigation with routes like /home, /username
-🌐 Profile Aggregation	Connect to platforms like GitHub, LeetCode, and Codeforces to display real-time stats
-📚 CP Sheet Management	Browse CP problems with search, filter, sort, and pagination by topic or difficulty
-⚡ Responsive UI	Modern, responsive interface built for both desktop and mobile
-📡 API Overview
-Endpoint	Method	Description	Access
-/api/auth/register	POST	Register a new user	Public
-/api/auth/login	POST	Authenticate and return a JWT	Public
-/api/profiles/:username	GET	Fetch a user’s public profile data	Public
-/api/profile	PUT	Update user profile (requires JWT)	Private
-/api/cp-sheets	GET	Get all CP sheets with filters, sorting, and pagination	Public
-🧠 Example API Usage
 
-Filter by Topic (e.g. Dynamic Programming):
+- **🔐 Secure Authentication:** Robust JWT-based login and registration system using secure password hashing.
+- **🌐 Profile Aggregation:** Connect accounts from GitHub, LeetCode, and Codeforces to display real-time stats.
+- **📚 CP Sheet Management:** - Create and manage custom Competitive Programming (CP) sheets.
+  - Organize problems by sections/topics.
+  - Track progress with visual completion bars.
+- **✅ Progress Tracking:** Mark problems as completed, track your daily activity, and visualize your growth.
+- **⚡ Modern UI:** Fully responsive dashboard built with **Next.js 16** and **Tailwind CSS v4**.
+- **🧭 Dynamic Routing:** User-friendly navigation and dynamic profile pages.
 
-GET /api/cp-sheets?topic=dp
+---
+
+## 🏗️ Tech Stack
+
+### Frontend (Client)
+- **Framework:** Next.js 16 (App Router)
+- **Language:** JavaScript / React 19
+- **Styling:** Tailwind CSS v4, Framer Motion (Animations)
+- **Components:** Radix UI, Lucide React
+- **Data Fetching:** Axios
+- **Linting/Formatting:** Biome
+
+### Backend (Server)
+- **Runtime:** Node.js
+- **Framework:** Express.js v5
+- **Database:** MongoDB (Mongoose ORM)
+- **Authentication:** JSON Web Tokens (JWT), BcryptJS
+- **Validation:** Mongoose Schemas
+
+---
+
+## 🛠️ Installation & Local Setup
+
+Follow these steps to run the project locally.
+
+### 1. Clone the Repository
+```
+git clone [https://github.com/vikgenix/Kudos_To_Code.git](https://github.com/vikgenix/Kudos_To_Code.git)
+cd Kudos_To_Code
+```
 
 
-Search by Problem Name:
-
-GET /api/cp-sheets?search=knapsack
-
-
-Sort by Difficulty:
-
-GET /api/cp-sheets?sort=difficulty_asc
+2. Backend Setup
+Navigate to the server directory, install dependencies, and configure the environment.
 
 
-Paginate Results:
 
-GET /api/cp-sheets?page=1&limit=20
+```
+cd server
+npm install
+```
 
-## 🧩 System Workflow
+Create a .env file in the server/ directory:
 
-User Registration / Login — via /api/auth/register and /api/auth/login
+Code snippet
 
-Profile Aggregation — fetch user data from coding platforms via backend API calls
+```
+PORT=5000
+MONGO_URI=your_mongodb_connection_string
+JWT_SECRET=your_super_secret_key
+FRONTEND_URL=http://localhost:3000
+```
 
-Portfolio Generation — dynamic profile route like /username displays all coding stats and projects
+Start the backend server:
 
-CRUD Operations — users can manage their own portfolio and problem sheets
 
-## 🚀 Future Enhancements
+```
+npm run dev
+# Server runs on http://localhost:5000
+```
 
-Integration with AtCoder, HackerRank, and CodeChef
+3. Frontend Setup
+Open a new terminal, navigate to the client directory, and install dependencies.
 
-Custom portfolio themes and dark mode
+```
+cd client
+npm install
+```
 
-Leaderboard and community rankings
+Create a .env file in the client/ directory:
 
-Activity analytics dashboard showing coding trends
+Code snippet
 
-## 📂 Project Folder Structure
+```
+NEXT_PUBLIC_API_URL=http://localhost:5000/api
+```
+
+Start the frontend development server:
+
+
+
+```
+npm run dev
+```
+Application runs on http://localhost:3000
+
+
+📡 API Endpoints
+The backend exposes a RESTful API. Below are the primary endpoints:
+Authentication
+Method
+Endpoint
+Description
+POST
+/api/auth/register
+Register a new user
+POST
+/api/auth/login
+Authenticate and receive JWT
+
+Sheets & Problems
+Method
+Endpoint
+Description
+GET
+/api/sheets
+Get all CP sheets (supports pagination/search)
+POST
+/api/sheets
+Create a new CP sheet
+GET
+/api/sheets/:id
+Get specific sheet details & problems
+PUT
+/api/sheets/:id
+Update sheet details
+DELETE
+/api/sheets/:id
+Delete a sheet
+POST
+/api/sheets/:sheetId/problems
+Add a problem to a sheet
+PUT
+/api/sheets/problems/:id/toggle
+Toggle problem completion status
+
+📂 Folder Structure
+
+
 ```
 Kudos_To_Code/
 │
-├── client/                             # Frontend (Next.js)
-│   ├── app/                            # Core application files
-│   │   ├── context/                    # React Context for global state
-│   │   │   └── AuthContext.js
-│   │   ├── dashboard/
-│   │   │   └── page.jsx
-│   │   ├── HeroSectionDemo/
-│   │   │   └── page.js
-│   │   ├── login/
-│   │   │   └── page.jsx
-│   │   ├── portfolio/
-│   │   │   └── page.js
-│   │   ├── signup/
-│   │   │   └── page.jsx
-│   │   ├── services/
-│   │   │   ├── api.js
-│   │   │   ├── authService.js
-│   │   │   └── utils.js
-│   │   ├── layout.js                   # Root layout file
-│   │   ├── not-found.js                # 404 Page
-│   │   ├── page.js                     # Main entry
-│   │   └── globals.css                 # Global CSS styles
-│   │
-│   ├── components/                     # Reusable UI Components
-│   │   ├── blocks/
-│   │   │   ├── footer-section.jsx
-│   │   │   ├── hero-section-dark.jsx
-│   │   ├── ui/
-│   │   │   ├── app-sidebar.jsx
-│   │   │   ├── chart-area-interactive.jsx
-│   │   │   ├── data-table.jsx
-│   │   │   ├── login-form.jsx
-│   │   │   ├── signup-form.jsx
-│   │   │   ├── section-cards.jsx
-│   │   │   ├── site-header.jsx
-│   │   │   ├── nav-main.jsx
-│   │   │   ├── nav-secondary.jsx
-│   │   │   ├── nav-projects.jsx
-│   │   │   ├── nav-user.jsx
-│   │   │   └── team-switcher.jsx
-│   │   ├── hooks/
-│   │   │   └── use-mobile.js
-│   │   └── lib/
-│   │       └── utils.js
-│   │
-│   ├── public/                         # Static assets (images/icons)
-│   │   ├── LoginKudos.jpg
-│   │   ├── SignupKudos.jpg
-│   │   ├── loginMascot.png
-│   │   └── logo.jpg
-│   │
-│   ├── .env                            # Frontend environment variables
-│   ├── next.config.mjs                 # Next.js configuration
-│   ├── jsconfig.json                   # Path aliases & JS config
-│   ├── package.json                    # Frontend dependencies
-│   ├── postcss.config.mjs              # PostCSS configuration
-│   └── README.md
+├── client/                 # Next.js Frontend
+│   ├── app/                # App Router pages and layouts
+│   ├── components/         # Reusable UI components
+│   ├── services/           # API interaction logic
+│   └── public/             # Static assets
 │
-├── server/                             # Backend (Node.js + Express)
-│   ├── config/
-│   │   └── db.js                       # MongoDB connection setup
-│   ├── controllers/
-│   │   └── authController.js           # Handles authentication routes
-│   ├── middlewares/
-│   │   └── authMiddleware.js           # JWT verification middleware
-│   ├── models/
-│   │   └── User.js                     # User model (Mongoose)
-│   ├── routes/
-│   │   └── auth.js                     # Auth route definitions
-│   ├── services/
-│   │   ├── hashService.js              # Password hashing utilities
-│   │   └── jwtService.js               # JWT token generation/validation
-│   ├── .env                            # Backend environment variables
-│   ├── server.js                       # Express app entry point
-│   ├── package.json                    # Backend dependencies
-│   └── README.md
+├── server/                 # Express Backend
+│   ├── config/             # DB configuration
+│   ├── controllers/        # Request logic
+│   ├── middlewares/        # Auth middleware
+│   ├── models/             # Mongoose models (User, Sheet, Problem)
+│   └── routes/             # API route definitions
 │
-├── .gitignore
-└── README.md                           # Project documentation (root)
+└── README.md               # Project Documentation
 ```
 
-## 🧑‍💻 Author
-Name:- Vikrant Yadav
-Role:- Full Stack Developer & Project Lead
+## 🚀 Future Enhancements
+- Integration with AtCoder and HackerRank APIs.
 
-Backend Link: https://kudos-to-code.onrender.com/
-Frontend Link : https://kudos-to-code.vercel.app/
+- Leaderboard system for community rankings.
+
+- Dark Mode toggle (Global).
+
+- Social sharing for completed sheets.
+
+## 🤝 Contributing
+Contributions are welcome! Please follow these steps:
+- Fork the repository.
+- Create a new branch (git checkout -b feature/YourFeature).
+- Commit your changes.
+- Push to the branch.
+- Open a Pull Request.
+
+## 🧑‍💻 Author
+Vikrant Yadav
+Role: Full Stack Developer & Project Lead
+GitHub Profile
+
+## 📄 License
+This project is licensed under the ISC License.
