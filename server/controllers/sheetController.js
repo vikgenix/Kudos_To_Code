@@ -23,8 +23,15 @@ exports.createSheet = async (req, res) => {
 
 exports.getSheets = async (req, res) => {
   try {
-    console.log("Fetching sheets for user:", req.user.id);
-    const sheets = await Sheet.find().lean();
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    console.log(`Fetching sheets for user: ${req.user.id}, Page: ${page}, Limit: ${limit}`);
+
+    const totalSheets = await Sheet.countDocuments();
+    const sheets = await Sheet.find().skip(skip).limit(limit).lean();
+    
     console.log("Found sheets count:", sheets.length);
     const user = await User.findById(req.user.id);
     const completedProblems = new Set(user.completedProblems.map((id) => id.toString()));
@@ -45,7 +52,15 @@ exports.getSheets = async (req, res) => {
       })
     );
 
-    res.json(sheetsWithProgress);
+    res.json({
+      data: sheetsWithProgress,
+      pagination: {
+        currentPage: page,
+        totalPages: Math.ceil(totalSheets / limit),
+        totalItems: totalSheets,
+        itemsPerPage: limit
+      }
+    });
   } catch (error) {
     res.status(500).json({ message: "Error fetching sheets", error: error.message });
   }
