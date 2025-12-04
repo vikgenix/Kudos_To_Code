@@ -26,11 +26,44 @@ exports.getSheets = async (req, res) => {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
     const skip = (page - 1) * limit;
+    const { search, filter, sort } = req.query;
 
-    console.log(`Fetching sheets for user: ${req.user.id}, Page: ${page}, Limit: ${limit}`);
+    console.log(`Fetching sheets - User: ${req.user.id}, Page: ${page}, Limit: ${limit}, Search: ${search}, Filter: ${filter}, Sort: ${sort}`);
 
-    const totalSheets = await Sheet.countDocuments();
-    const sheets = await Sheet.find().skip(skip).limit(limit).lean();
+    // Build Query
+    const query = {};
+    
+    // Search (Title or Description)
+    if (search) {
+      query.$or = [
+        { title: { $regex: search, $options: "i" } },
+        { description: { $regex: search, $options: "i" } },
+      ];
+    }
+
+    // Filter (Public/Private)
+    if (filter === "public") {
+      query.isPublic = true;
+    } else if (filter === "private") {
+      query.isPublic = false;
+    }
+
+    // Sort
+    let sortOption = { createdAt: -1 }; // Default: Newest first
+    if (sort === "oldest") {
+      sortOption = { createdAt: 1 };
+    } else if (sort === "title_asc") {
+      sortOption = { title: 1 };
+    } else if (sort === "title_desc") {
+      sortOption = { title: -1 };
+    }
+
+    const totalSheets = await Sheet.countDocuments(query);
+    const sheets = await Sheet.find(query)
+      .sort(sortOption)
+      .skip(skip)
+      .limit(limit)
+      .lean();
     
     console.log("Found sheets count:", sheets.length);
     const user = await User.findById(req.user.id);

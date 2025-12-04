@@ -31,7 +31,16 @@ api.interceptors.response.use(
   }
 );
 
-export const fetchSheets = (page = 1, limit = 10) => api.get(`/sheets?page=${page}&limit=${limit}`);
+export const fetchSheets = ({ page = 1, limit = 10, search = "", filter = "all", sort = "newest" } = {}) => {
+  const params = new URLSearchParams({
+    page,
+    limit,
+    search,
+    filter,
+    sort,
+  });
+  return api.get(`/sheets?${params.toString()}`);
+};
 export const fetchSheetById = (id) => api.get(`/sheets/${id}`);
 export const createSheet = (data) => api.post("/sheets", data);
 export const updateSheet = (id, data) => api.put(`/sheets/${id}`, data);

@@ -247,6 +247,7 @@ const CodingSheetsApp = () => {
   // Search and Filter State
   const [searchQuery, setSearchQuery] = useState("");
   const [filterType, setFilterType] = useState("all"); // 'all', 'public', 'private'
+  const [sortBy, setSortBy] = useState("newest"); // 'newest', 'oldest', 'title_asc', 'title_desc'
 
   // Problem Search/Filter/Sort State
   const [problemSearchQuery, setProblemSearchQuery] = useState("");
@@ -271,9 +272,14 @@ const CodingSheetsApp = () => {
   });
 
   // ... (useEffect and load functions remain same)
+  // Debounce search query
   useEffect(() => {
-    loadSheets();
-  }, []);
+    const timer = setTimeout(() => {
+      setCurrentPage(1);
+      loadSheets(1);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [searchQuery, filterType, sortBy]);
 
   // Fetch sheet details when selected
   useEffect(() => {
@@ -289,7 +295,13 @@ const CodingSheetsApp = () => {
     setError(null);
     try {
       console.log(`Loading sheets for page ${page}...`);
-      const response = await fetchSheets(page, itemsPerPage);
+      const response = await fetchSheets({ 
+        page, 
+        limit: itemsPerPage,
+        search: searchQuery,
+        filter: filterType,
+        sort: sortBy
+      });
       console.log("Sheets loaded:", response.data);
       
       // Handle both old format (array) and new format (object with data & pagination)
@@ -402,19 +414,8 @@ const CodingSheetsApp = () => {
     }
   };
 
-  // Filtered Sheets Logic
-  const filteredSheets = sheets.filter(sheet => {
-    const matchesSearch = sheet.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                          sheet.description.toLowerCase().includes(searchQuery.toLowerCase());
-    
-    if (!matchesSearch) return false;
-
-    if (filterType === "all") return true;
-    if (filterType === "public") return sheet.isPublic;
-    if (filterType === "private") return !sheet.isPublic; // Assuming private means not public
-    
-    return true;
-  });
+  // Filtered Sheets Logic - REMOVED (Handled by backend)
+  const filteredSheets = sheets;
 
   // Processed Sections Logic (Filter & Sort Problems)
   const processedSections = selectedSheetDetail?.sections.map(section => {
@@ -901,6 +902,19 @@ const CodingSheetsApp = () => {
                     <option value="all">All Sheets</option>
                     <option value="public">Public Only</option>
                     <option value="private">Private Only</option>
+                  </Select>
+                </div>
+
+                {/* Sort Dropdown */}
+                <div className="w-full sm:w-40">
+                  <Select
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value)}
+                  >
+                    <option value="newest">Newest First</option>
+                    <option value="oldest">Oldest First</option>
+                    <option value="title_asc">Title (A-Z)</option>
+                    <option value="title_desc">Title (Z-A)</option>
                   </Select>
                 </div>
 
