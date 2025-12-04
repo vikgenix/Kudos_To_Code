@@ -239,6 +239,11 @@ const CodingSheetsApp = () => {
   const [selectedSheetDetail, setSelectedSheetDetail] = useState(null);
   const [error, setError] = useState(null);
   
+  // Pagination State
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [itemsPerPage] = useState(9); // 3x3 grid looks good
+  
   // Search and Filter State
   const [searchQuery, setSearchQuery] = useState("");
   const [filterType, setFilterType] = useState("all"); // 'all', 'public', 'private'
@@ -279,19 +284,35 @@ const CodingSheetsApp = () => {
     }
   }, [selectedSheetId]);
 
-  const loadSheets = async () => {
+  const loadSheets = async (page = 1) => {
     setLoading(true);
     setError(null);
     try {
-      console.log("Loading sheets...");
-      const response = await fetchSheets();
+      console.log(`Loading sheets for page ${page}...`);
+      const response = await fetchSheets(page, itemsPerPage);
       console.log("Sheets loaded:", response.data);
-      setSheets(response.data);
+      
+      // Handle both old format (array) and new format (object with data & pagination)
+      if (Array.isArray(response.data)) {
+        setSheets(response.data);
+        setTotalPages(1);
+      } else {
+        setSheets(response.data.data);
+        setTotalPages(response.data.pagination.totalPages);
+        setCurrentPage(response.data.pagination.currentPage);
+      }
     } catch (error) {
       console.error("Error fetching sheets:", error);
       setError(error.message || "Failed to load sheets");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handlePageChange = (newPage) => {
+    if (newPage >= 1 && newPage <= totalPages) {
+      setCurrentPage(newPage);
+      loadSheets(newPage);
     }
   };
 
@@ -1002,6 +1023,45 @@ const CodingSheetsApp = () => {
               </div>
             )}
           </section>
+        )}
+        {/* Pagination Controls */}
+        {!selectedSheetDetail && totalPages > 1 && (
+          <div className="flex items-center justify-center gap-2 mt-8 pb-8">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => handlePageChange(currentPage - 1)}
+              disabled={currentPage === 1 || loading}
+            >
+              <ChevronLeft className="h-4 w-4 mr-1" />
+              Previous
+            </Button>
+            
+            <div className="flex items-center gap-1">
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                <Button
+                  key={page}
+                  variant={currentPage === page ? "default" : "ghost"}
+                  size="sm"
+                  onClick={() => handlePageChange(page)}
+                  disabled={loading}
+                  className="w-8 h-8 p-0"
+                >
+                  {page}
+                </Button>
+              ))}
+            </div>
+
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => handlePageChange(currentPage + 1)}
+              disabled={currentPage === totalPages || loading}
+            >
+              Next
+              <ChevronLeft className="h-4 w-4 ml-1 rotate-180" />
+            </Button>
+          </div>
         )}
       </main>
     </div>
