@@ -22,6 +22,12 @@ Recruiters and peers often struggle to view a candidate's complete technical cap
 
 ---
 
+## 🔗 Live Website
+
+👉 https://kudos-to-code.vercel.app/
+
+---
+
 ## 🔑 Key Features
 
 - **🔐 Secure Authentication:** Robust JWT-based login and registration system using secure password hashing.
